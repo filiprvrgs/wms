@@ -221,9 +221,14 @@ app.get('/api/search', (req, res) => {
 // Inicializar dados
 initializeWarehouse();
 
-// Iniciar servidor
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor WMS rodando em http://localhost:${PORT}`);
-    console.log(`📊 Total de prateleiras: ${warehouseData.shelves.size}`);
-    console.log(`📦 Produtos cadastrados: ${warehouseData.products.size}`);
-}); 
+// Para desenvolvimento local
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`🚀 Servidor WMS rodando em http://localhost:${PORT}`);
+        console.log(`📊 Total de prateleiras: ${warehouseData.shelves.size}`);
+        console.log(`📦 Produtos cadastrados: ${warehouseData.products.size}`);
+    });
+}
+
+// Para Vercel
+export default app; 
