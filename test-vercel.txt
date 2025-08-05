@@ -1,0 +1,2 @@
+Teste para forçar nova implantação no Vercel
+Data: 05/08/2025 
