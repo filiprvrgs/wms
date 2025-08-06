@@ -438,6 +438,54 @@
             margin-top: 25px;
         }
 
+        /* Filter Section */
+        .filter-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+            border: 1px solid rgba(30, 60, 114, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid rgba(30, 60, 114, 0.2);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #5a6c7d;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-btn:hover {
+            border-color: #1e3c72;
+            background: rgba(30, 60, 114, 0.1);
+            color: #1e3c72;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border-color: #1e3c72;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+        }
+
+        .filter-btn i {
+            font-size: 16px;
+        }
+
         /* Mobile Menu */
         .mobile-menu-btn {
             display: none;
@@ -469,20 +517,125 @@
             }
 
             .main-content {
+                padding: 15px;
+            }
+
+            .header {
                 padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .warehouse-layout {
+                padding: 20px;
             }
 
             .gondolas {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-                gap: 10px;
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+                gap: 8px;
+            }
+
+            .gondola {
+                padding: 10px;
+            }
+
+            .gondola-label {
+                font-size: 12px;
             }
 
             .shelf {
-                height: 35px;
+                height: 30px;
+                font-size: 10px;
+            }
+
+            .filter-buttons {
+                gap: 8px;
+            }
+
+            .filter-btn {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+
+            .filter-btn i {
+                font-size: 14px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+
+            .modal-content {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .stats-grid {
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 15px;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .gondolas {
+                grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+                gap: 5px;
+            }
+
+            .shelf {
+                height: 25px;
+                font-size: 9px;
+            }
+
+            .filter-buttons {
+                justify-content: center;
+            }
+
+            .filter-btn {
+                padding: 6px 12px;
                 font-size: 11px;
             }
         }
@@ -586,9 +739,9 @@
             <!-- Warehouse Section -->
             <div class="content-section" id="warehouse">
                 <div class="warehouse-layout">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                         <h2>Layout do Armazém</h2>
-                        <div style="display: flex; gap: 10px;">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                             <button class="btn btn-primary" onclick="showModal('add')">
                                 <i class="fas fa-plus"></i> Adicionar
                             </button>
@@ -600,6 +753,23 @@
                             </button>
                         </div>
                     </div>
+                    
+                    <!-- Filtros -->
+                    <div class="filter-section">
+                        <h3 style="margin-bottom: 15px; color: #1e3c72;">Filtros</h3>
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="all" onclick="filterShelves('all')">
+                                <i class="fas fa-th"></i> Todas
+                            </button>
+                            <button class="filter-btn" data-filter="available" onclick="filterShelves('available')">
+                                <i class="fas fa-check-circle"></i> Disponíveis
+                            </button>
+                            <button class="filter-btn" data-filter="occupied" onclick="filterShelves('occupied')">
+                                <i class="fas fa-times-circle"></i> Ocupadas
+                            </button>
+                        </div>
+                    </div>
+                    
                     <div id="warehouse-layout">
                         <!-- Layout será gerado aqui -->
                     </div>
@@ -906,6 +1076,11 @@
                     </div>
                 </div>
             `).join('');
+            
+            // Aplicar filtro atual após carregar
+            setTimeout(() => {
+                filterShelves(currentFilter);
+            }, 100);
         }
 
         // Carregar produtos
@@ -1179,6 +1354,80 @@
 
         function formatTime(timestamp) {
             return new Date(timestamp).toLocaleString('pt-BR');
+        }
+
+        // Filtros
+        let currentFilter = 'all';
+
+        function filterShelves(filter) {
+            currentFilter = filter;
+            
+            // Atualizar botões de filtro
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+            
+            // Aplicar filtro nas prateleiras
+            const shelves = document.querySelectorAll('.shelf');
+            shelves.forEach(shelf => {
+                const isAvailable = shelf.classList.contains('available');
+                const isOccupied = shelf.classList.contains('occupied');
+                
+                switch(filter) {
+                    case 'available':
+                        shelf.style.display = isAvailable ? 'flex' : 'none';
+                        break;
+                    case 'occupied':
+                        shelf.style.display = isOccupied ? 'flex' : 'none';
+                        break;
+                    case 'all':
+                    default:
+                        shelf.style.display = 'flex';
+                        break;
+                }
+            });
+            
+            // Atualizar estatísticas do filtro
+            updateFilterStats(filter);
+        }
+
+        function updateFilterStats(filter) {
+            const totalShelves = warehouseData.shelves.size;
+            const availableShelves = Array.from(warehouseData.shelves.values()).filter(s => s.status === 'available').length;
+            const occupiedShelves = Array.from(warehouseData.shelves.values()).filter(s => s.status === 'occupied').length;
+            
+            let filteredCount = 0;
+            switch(filter) {
+                case 'available':
+                    filteredCount = availableShelves;
+                    break;
+                case 'occupied':
+                    filteredCount = occupiedShelves;
+                    break;
+                case 'all':
+                default:
+                    filteredCount = totalShelves;
+                    break;
+            }
+            
+            // Adicionar contador visual se necessário
+            const filterSection = document.querySelector('.filter-section');
+            let counter = filterSection.querySelector('.filter-counter');
+            if (!counter) {
+                counter = document.createElement('div');
+                counter.className = 'filter-counter';
+                counter.style.cssText = 'margin-top: 10px; text-align: center; color: #1e3c72; font-weight: 600;';
+                filterSection.appendChild(counter);
+            }
+            
+            const filterNames = {
+                'all': 'Todas',
+                'available': 'Disponíveis',
+                'occupied': 'Ocupadas'
+            };
+            
+            counter.textContent = `${filterNames[filter]}: ${filteredCount} prateleiras`;
         }
 
         // Mobile menu
