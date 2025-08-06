@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema WMS Completo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 30px 0;
+            box-shadow: 0 20px 60px rgba(30, 60, 114, 0.2);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 0 30px 30px;
+            border-bottom: 1px solid rgba(30, 60, 114, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .sidebar-header i {
+            color: #1e3c72;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 24px;
+        }
+
+        .sidebar-header h2 {
+            color: #1e3c72;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0 20px;
+        }
+
+        .nav-links li {
+            margin-bottom: 10px;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            color: #5a6c7d;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+        }
+
+        .nav-links i {
+            font-size: 18px;
+            width: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(30, 60, 114, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #1e3c72;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-actions i {
+            color: #1e3c72;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .header-actions i:hover {
+            background: rgba(30, 60, 114, 0.1);
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(30, 60, 114, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+        }
+
+        .stat-icon.available {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .stat-icon.occupied {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .stat-info h3 {
+            color: #5a6c7d;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .stat-number {
+            color: #1e3c72;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Warehouse Layout */
+        .warehouse-layout {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(30, 60, 114, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .aisle {
+            margin-bottom: 40px;
+        }
+
+        .aisle h3 {
+            color: #1e3c72;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .gondolas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .gondola {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+            border: 1px solid rgba(30, 60, 114, 0.1);
+        }
+
+        .gondola-label {
+            text-align: center;
+            font-weight: 600;
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .levels {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .shelf {
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shelf.available {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        .shelf.occupied {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .shelf:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+        }
+
+        .shelf.selected {
+            border: 3px solid #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.2);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(30, 60, 114, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h3 {
+            color: #1e3c72;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(30, 60, 114, 0.1);
+            color: #1e3c72;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1e3c72;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(30, 60, 114, 0.1);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #1e3c72;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gondolas {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 10px;
+            }
+
+            .shelf {
+                height: 35px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-warehouse"></i>
+                <h2>WMS</h2>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active" data-section="dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a></li>
+                <li><a href="#" data-section="warehouse">
+                    <i class="fas fa-map"></i>
+                    <span>Layout</span>
+                </a></li>
+                <li><a href="#" data-section="products">
+                    <i class="fas fa-boxes"></i>
+                    <span>Produtos</span>
+                </a></li>
+                <li><a href="#" data-section="transactions">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transações</span>
+                </a></li>
+                <li><a href="#" data-section="reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Relatórios</span>
+                </a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <button class="mobile-menu-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1>Sistema WMS</h1>
+                <div class="header-actions">
+                    <i class="fas fa-bell"></i>
+                    <i class="fas fa-user"></i>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <div class="content-section active" id="dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total de Prateleiras</h3>
+                            <p class="stat-number" id="total-shelves">720</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon available">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Disponíveis</h3>
+                            <p class="stat-number" id="available-shelves">540</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon occupied">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Ocupadas</h3>
+                            <p class="stat-number" id="occupied-shelves">180</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Taxa de Ocupação</h3>
+                            <p class="stat-number" id="occupancy-rate">25%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warehouse-layout">
+                    <h2>Atividade Recente</h2>
+                    <div id="recent-activity">
+                        <!-- Atividade será carregada aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warehouse Section -->
+            <div class="content-section" id="warehouse">
+                <div class="warehouse-layout">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Layout do Armazém</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" onclick="showModal('add')">
+                                <i class="fas fa-plus"></i> Adicionar
+                            </button>
+                            <button class="btn btn-danger" onclick="showModal('remove')">
+                                <i class="fas fa-minus"></i> Remover
+                            </button>
+                            <button class="btn btn-success" onclick="showModal('edit')">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        </div>
+                    </div>
+                    <div id="warehouse-layout">
+                        <!-- Layout será gerado aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Section -->
+            <div class="content-section" id="products">
+                <div class="warehouse-layout">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Gestão de Produtos</h2>
+                        <button class="btn btn-primary" onclick="showModal('add')">
+                            <i class="fas fa-plus"></i> Adicionar Produto
+                        </button>
+                    </div>
+                    <div id="products-grid">
+                        <!-- Produtos serão carregados aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Section -->
+            <div class="content-section" id="transactions">
+                <div class="warehouse-layout">
+                    <h2>Histórico de Transações</h2>
+                    <div id="transactions-list">
+                        <!-- Transações serão carregadas aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div class="content-section" id="reports">
+                <div class="warehouse-layout">
+                    <h2>Relatórios</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <div class="stat-card">
+                            <h3>Relatório de Ocupação</h3>
+                            <p>Análise detalhada da ocupação do armazém</p>
+                            <button class="btn btn-secondary" style="margin-top: 15px;">Gerar Relatório</button>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Movimentação de Produtos</h3>
+                            <p>Histórico de entrada e saída de produtos</p>
+                            <button class="btn btn-secondary" style="margin-top: 15px;">Gerar Relatório</button>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Eficiência do Armazém</h3>
+                            <p>Métricas de performance e otimização</p>
+                            <button class="btn btn-secondary" style="margin-top: 15px;">Gerar Relatório</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Adicionar Produto</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="product-form">
+                <div class="form-group">
+                    <label for="product-name">Nome do Produto</label>
+                    <input type="text" id="product-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="product-sku">SKU</label>
+                    <input type="text" id="product-sku" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-quantity">Quantidade</label>
+                        <input type="number" id="product-quantity" value="1" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-unit">Unidade</label>
+                        <select id="product-unit">
+                            <option value="un">Unidade</option>
+                            <option value="kg">Quilograma</option>
+                            <option value="l">Litro</option>
+                            <option value="m">Metro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="product-category">Categoria</label>
+                    <select id="product-category">
+                        <option value="Eletrônicos">Eletrônicos</option>
+                        <option value="Vestuário">Vestuário</option>
+                        <option value="Alimentos">Alimentos</option>
+                        <option value="Livros">Livros</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Descrição</label>
+                    <textarea id="product-description" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Dados do armazém
+        let warehouseData = {
+            aisles: [
+                { name: 'Rua A', gondolas: 20 },
+                { name: 'Rua B', gondolas: 20 },
+                { name: 'Rua C', gondolas: 20 },
+                { name: 'Rua D', gondolas: 20 },
+                { name: 'Rua E', gondolas: 20 },
+                { name: 'Rua F', gondolas: 20 }
+            ],
+            shelves: new Map(),
+            products: new Map(),
+            transactions: []
+        };
+
+        let selectedShelf = null;
+        let modalType = null;
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeWarehouse();
+            setupNavigation();
+            setupEventListeners();
+            loadDashboard();
+        });
+
+        // Inicializar dados do armazém
+        function initializeWarehouse() {
+            const savedData = localStorage.getItem('wmsData');
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+                warehouseData.aisles = parsed.aisles;
+                warehouseData.shelves = new Map(parsed.shelves);
+                warehouseData.products = new Map(parsed.products);
+                warehouseData.transactions = parsed.transactions;
+            } else {
+                warehouseData.aisles.forEach(aisle => {
+                    for (let gondola = 1; gondola <= aisle.gondolas; gondola++) {
+                        for (let level = 1; level <= 6; level++) {
+                            const position = `${aisle.name}-${gondola.toString().padStart(2, '0')}-${level.toString().padStart(2, '0')}`;
+                            const isOccupied = Math.random() < 0.25;
+                            
+                            warehouseData.shelves.set(position, {
+                                position,
+                                aisle: aisle.name,
+                                gondola,
+                                level,
+                                status: isOccupied ? 'occupied' : 'available',
+                                productId: isOccupied ? `PROD-${Math.floor(Math.random() * 1000)}` : null,
+                                lastUpdated: new Date().toISOString()
+                            });
+
+                            if (isOccupied) {
+                                const productId = `PROD-${Math.floor(Math.random() * 1000)}`;
+                                warehouseData.products.set(productId, {
+                                    id: productId,
+                                    name: 'Produto Exemplo',
+                                    sku: `SKU-${Math.floor(Math.random() * 1000)}`,
+                                    quantity: Math.floor(Math.random() * 50) + 10,
+                                    unit: 'un',
+                                    category: 'Eletrônicos',
+                                    description: 'Produto de exemplo para demonstração',
+                                    position,
+                                    createdAt: new Date().toISOString()
+                                });
+                            }
+                        }
+                    }
+                });
+                saveData();
+            }
+        }
+
+        // Salvar dados
+        function saveData() {
+            const data = {
+                aisles: warehouseData.aisles,
+                shelves: Array.from(warehouseData.shelves.entries()),
+                products: Array.from(warehouseData.products.entries()),
+                transactions: warehouseData.transactions
+            };
+            localStorage.setItem('wmsData', JSON.stringify(data));
+        }
+
+        // Configurar navegação
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-links a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const section = this.dataset.section;
+                    switchSection(section);
+                });
+            });
+        }
+
+        // Trocar seção
+        function switchSection(section) {
+            document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+            document.getElementById(section).classList.add('active');
+            
+            loadSectionContent(section);
+        }
+
+        // Carregar conteúdo da seção
+        function loadSectionContent(section) {
+            switch(section) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'warehouse':
+                    loadWarehouse();
+                    break;
+                case 'products':
+                    loadProducts();
+                    break;
+                case 'transactions':
+                    loadTransactions();
+                    break;
+            }
+        }
+
+        // Carregar dashboard
+        function loadDashboard() {
+            const stats = {
+                total: warehouseData.shelves.size,
+                available: Array.from(warehouseData.shelves.values()).filter(s => s.status === 'available').length,
+                occupied: Array.from(warehouseData.shelves.values()).filter(s => s.status === 'occupied').length,
+                occupancyRate: ((Array.from(warehouseData.shelves.values()).filter(s => s.status === 'occupied').length / warehouseData.shelves.size) * 100).toFixed(1)
+            };
+
+            document.getElementById('total-shelves').textContent = stats.total;
+            document.getElementById('available-shelves').textContent = stats.available;
+            document.getElementById('occupied-shelves').textContent = stats.occupied;
+            document.getElementById('occupancy-rate').textContent = stats.occupancyRate + '%';
+
+            const recentActivity = document.getElementById('recent-activity');
+            const recentTransactions = warehouseData.transactions.slice(-5).reverse();
+            recentActivity.innerHTML = recentTransactions.map(txn => `
+                <div style="padding: 15px; border-bottom: 1px solid #eee;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas ${getTransactionIcon(txn.type)}" style="color: #1e3c72;"></i>
+                        <div>
+                            <p style="margin: 0; font-weight: 500;">${txn.details}</p>
+                            <small style="color: #666;">${formatTime(txn.timestamp)}</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('') || '<p style="text-align: center; color: #666; padding: 20px;">Nenhuma atividade recente</p>';
+        }
+
+        // Carregar layout do armazém
+        function loadWarehouse() {
+            const layout = document.getElementById('warehouse-layout');
+            layout.innerHTML = warehouseData.aisles.map(aisle => `
+                <div class="aisle">
+                    <h3>${aisle.name}</h3>
+                    <div class="gondolas">
+                        ${Array.from({length: aisle.gondolas}, (_, i) => {
+                            const gondolaNum = i + 1;
+                            return `
+                                <div class="gondola">
+                                    <div class="gondola-label">G${gondolaNum.toString().padStart(2, '0')}</div>
+                                    <div class="levels">
+                                        ${Array.from({length: 6}, (_, j) => {
+                                            const levelNum = j + 1;
+                                            const position = `${aisle.name}-${gondolaNum.toString().padStart(2, '0')}-${levelNum.toString().padStart(2, '0')}`;
+                                            const shelf = warehouseData.shelves.get(position);
+                                            const product = shelf?.productId ? warehouseData.products.get(shelf.productId) : null;
+                                            
+                                            return `
+                                                <div class="shelf ${shelf?.status || 'available'}" 
+                                                     data-position="${position}"
+                                                     onclick="selectShelf(this, '${position}')">
+                                                    ${product ? `
+                                                        <div class="shelf-info">
+                                                            <small>${product.name}</small>
+                                                            <small>${product.quantity} ${product.unit}</small>
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Carregar produtos
+        function loadProducts() {
+            const grid = document.getElementById('products-grid');
+            const products = Array.from(warehouseData.products.values());
+            grid.innerHTML = products.map(product => `
+                <div class="stat-card" style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="margin: 0 0 10px 0; color: #1e3c72;">${product.name}</h3>
+                            <p style="margin: 0; color: #666;">SKU: ${product.sku}</p>
+                            <p style="margin: 5px 0; color: #666;">Quantidade: ${product.quantity} ${product.unit}</p>
+                            <p style="margin: 5px 0; color: #666;">Posição: ${product.position}</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="editProduct('${product.id}')">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                    </div>
+                </div>
+            `).join('') || '<p style="text-align: center; color: #666; padding: 20px;">Nenhum produto cadastrado</p>';
+        }
+
+        // Carregar transações
+        function loadTransactions() {
+            const list = document.getElementById('transactions-list');
+            const transactions = warehouseData.transactions.slice().reverse();
+            list.innerHTML = transactions.map(txn => `
+                <div class="stat-card" style="margin-bottom: 15px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <i class="fas ${getTransactionIcon(txn.type)}" style="color: #1e3c72; font-size: 20px;"></i>
+                        <div style="flex: 1;">
+                            <p style="margin: 0; font-weight: 500;">${txn.details}</p>
+                            <small style="color: #666;">${formatTime(txn.timestamp)}</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('') || '<p style="text-align: center; color: #666; padding: 20px;">Nenhuma transação encontrada</p>';
+        }
+
+        // Selecionar prateleira
+        function selectShelf(element, position) {
+            document.querySelectorAll('.shelf.selected').forEach(s => s.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedShelf = { element, position };
+        }
+
+        // Mostrar modal
+        function showModal(type) {
+            if (!selectedShelf && type !== 'add') {
+                alert('Selecione uma prateleira primeiro!');
+                return;
+            }
+
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const form = document.getElementById('product-form');
+
+            modalType = type;
+
+            if (type === 'add') {
+                title.textContent = 'Adicionar Produto';
+                form.reset();
+            } else if (type === 'remove') {
+                title.textContent = 'Remover Produto';
+                if (confirm('Tem certeza que deseja remover o produto desta prateleira?')) {
+                    removeProductFromShelf();
+                }
+                return;
+            } else if (type === 'edit') {
+                title.textContent = 'Editar Produto';
+                const shelf = warehouseData.shelves.get(selectedShelf.position);
+                if (shelf && shelf.productId) {
+                    const product = warehouseData.products.get(shelf.productId);
+                    if (product) {
+                        document.getElementById('product-name').value = product.name;
+                        document.getElementById('product-sku').value = product.sku;
+                        document.getElementById('product-quantity').value = product.quantity;
+                        document.getElementById('product-unit').value = product.unit;
+                        document.getElementById('product-category').value = product.category;
+                        document.getElementById('product-description').value = product.description || '';
+                    }
+                }
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        // Fechar modal
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+            modalType = null;
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            document.getElementById('product-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('product-name').value,
+                    sku: document.getElementById('product-sku').value,
+                    quantity: parseInt(document.getElementById('product-quantity').value),
+                    unit: document.getElementById('product-unit').value,
+                    category: document.getElementById('product-category').value,
+                    description: document.getElementById('product-description').value
+                };
+
+                if (modalType === 'add') {
+                    addProductToShelf(formData);
+                } else if (modalType === 'edit') {
+                    editProductInShelf(formData);
+                }
+
+                closeModal();
+            });
+        }
+
+        // Adicionar produto
+        function addProductToShelf(productData) {
+            if (!selectedShelf) {
+                alert('Selecione uma prateleira primeiro!');
+                return;
+            }
+
+            const position = selectedShelf.position;
+            const shelf = warehouseData.shelves.get(position);
+
+            if (shelf.status === 'occupied') {
+                alert('Esta prateleira já está ocupada!');
+                return;
+            }
+
+            const productId = `PROD-${Date.now()}`;
+            const product = {
+                id: productId,
+                ...productData,
+                position,
+                createdAt: new Date().toISOString()
+            };
+
+            warehouseData.products.set(productId, product);
+            warehouseData.shelves.set(position, {
+                ...shelf,
+                status: 'occupied',
+                productId,
+                lastUpdated: new Date().toISOString()
+            });
+
+            warehouseData.transactions.push({
+                id: `TXN-${Date.now()}`,
+                type: 'add',
+                position,
+                productId,
+                timestamp: new Date().toISOString(),
+                details: `Produto ${productData.name} adicionado à prateleira ${position}`
+            });
+
+            saveData();
+            loadSectionContent(document.querySelector('.nav-links a.active').dataset.section);
+            alert('Produto adicionado com sucesso!');
+        }
+
+        // Remover produto
+        function removeProductFromShelf() {
+            if (!selectedShelf) {
+                alert('Selecione uma prateleira primeiro!');
+                return;
+            }
+
+            const position = selectedShelf.position;
+            const shelf = warehouseData.shelves.get(position);
+
+            if (shelf.status === 'available') {
+                alert('Esta prateleira já está vazia!');
+                return;
+            }
+
+            const product = warehouseData.products.get(shelf.productId);
+
+            warehouseData.products.delete(shelf.productId);
+            warehouseData.shelves.set(position, {
+                ...shelf,
+                status: 'available',
+                productId: null,
+                lastUpdated: new Date().toISOString()
+            });
+
+            warehouseData.transactions.push({
+                id: `TXN-${Date.now()}`,
+                type: 'remove',
+                position,
+                productId: shelf.productId,
+                timestamp: new Date().toISOString(),
+                details: `Produto removido da prateleira ${position}`
+            });
+
+            saveData();
+            loadSectionContent(document.querySelector('.nav-links a.active').dataset.section);
+            alert('Produto removido com sucesso!');
+        }
+
+        // Editar produto
+        function editProductInShelf(productData) {
+            if (!selectedShelf) {
+                alert('Selecione uma prateleira primeiro!');
+                return;
+            }
+
+            const position = selectedShelf.position;
+            const shelf = warehouseData.shelves.get(position);
+
+            if (!shelf.productId) {
+                alert('Esta prateleira não tem produto para editar!');
+                return;
+            }
+
+            const product = warehouseData.products.get(shelf.productId);
+            if (!product) {
+                alert('Produto não encontrado!');
+                return;
+            }
+
+            const updatedProduct = {
+                ...product,
+                ...productData,
+                updatedAt: new Date().toISOString()
+            };
+
+            warehouseData.products.set(shelf.productId, updatedProduct);
+
+            warehouseData.transactions.push({
+                id: `TXN-${Date.now()}`,
+                type: 'edit',
+                position,
+                productId: shelf.productId,
+                timestamp: new Date().toISOString(),
+                details: `Produto ${productData.name} editado na prateleira ${position}`
+            });
+
+            saveData();
+            loadSectionContent(document.querySelector('.nav-links a.active').dataset.section);
+            alert('Produto editado com sucesso!');
+        }
+
+        // Editar produto (função global)
+        function editProduct(productId) {
+            const product = warehouseData.products.get(productId);
+            if (!product) return;
+
+            document.getElementById('product-name').value = product.name;
+            document.getElementById('product-sku').value = product.sku;
+            document.getElementById('product-quantity').value = product.quantity;
+            document.getElementById('product-unit').value = product.unit;
+            document.getElementById('product-category').value = product.category;
+            document.getElementById('product-description').value = product.description;
+
+            showModal('edit');
+        }
+
+        // Funções auxiliares
+        function getTransactionIcon(type) {
+            switch(type) {
+                case 'add': return 'fa-plus-circle';
+                case 'remove': return 'fa-minus-circle';
+                case 'edit': return 'fa-edit';
+                default: return 'fa-info-circle';
+            }
+        }
+
+        function formatTime(timestamp) {
+            return new Date(timestamp).toLocaleString('pt-BR');
+        }
+
+        // Mobile menu
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+    </script>
+</body>
+</html> 
