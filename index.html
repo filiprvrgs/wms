@@ -338,6 +338,18 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
         }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .btn:disabled:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
 
         /* Modal */
         .modal {
@@ -1118,6 +1130,7 @@
             setupNavigation();
             setupEventListeners();
             loadDashboard();
+            updateButtonStates(); // Inicializar estado dos botões
         });
 
         // Inicializar dados do armazém
@@ -1270,7 +1283,8 @@
                                             return `
                                                 <div class="shelf ${shelf?.status || 'available'}" 
                                                      data-position="${position}"
-                                                     onclick="selectShelf(this, '${position}')">
+                                                     onclick="selectShelf(this, '${position}')"
+                                                     title="${shelf?.status === 'occupied' ? 'Clique para selecionar - Produto pode ser removido' : 'Clique para selecionar - Prateleira vazia'}">
                                                     ${product ? `
                                                         <div class="shelf-info">
                                                             <small>${product.name}</small>
@@ -1291,6 +1305,7 @@
             // Aplicar filtro atual após carregar
             setTimeout(() => {
                 filterShelves(currentFilter);
+                updateButtonStates(); // Atualizar estado dos botões após carregar
             }, 100);
         }
 
@@ -1337,6 +1352,42 @@
             document.querySelectorAll('.shelf.selected').forEach(s => s.classList.remove('selected'));
             element.classList.add('selected');
             selectedShelf = { element, position };
+            
+            // Atualizar estado dos botões baseado na prateleira selecionada
+            updateButtonStates();
+        }
+        
+        // Atualizar estado dos botões
+        function updateButtonStates() {
+            const addBtn = document.querySelector('button[onclick="showModal(\'add\')"]');
+            const removeBtn = document.querySelector('button[onclick="showModal(\'remove\')"]');
+            const editBtn = document.querySelector('button[onclick="showModal(\'edit\')"]');
+            
+            if (!selectedShelf) {
+                // Nenhuma prateleira selecionada
+                addBtn.disabled = true;
+                removeBtn.disabled = true;
+                editBtn.disabled = true;
+                addBtn.title = 'Selecione uma prateleira primeiro';
+                removeBtn.title = 'Selecione uma prateleira primeiro';
+                editBtn.title = 'Selecione uma prateleira primeiro';
+                return;
+            }
+            
+            const shelf = warehouseData.shelves.get(selectedShelf.position);
+            const isOccupied = shelf && shelf.status === 'occupied' && shelf.productId;
+            
+            // Botão Adicionar - só funciona em prateleiras vazias
+            addBtn.disabled = isOccupied;
+            addBtn.title = isOccupied ? 'Esta prateleira já está ocupada' : 'Adicionar produto à prateleira';
+            
+            // Botão Remover - só funciona em prateleiras ocupadas
+            removeBtn.disabled = !isOccupied;
+            removeBtn.title = isOccupied ? 'Remover produto da prateleira' : 'Esta prateleira está vazia';
+            
+            // Botão Editar - só funciona em prateleiras ocupadas
+            editBtn.disabled = !isOccupied;
+            editBtn.title = isOccupied ? 'Editar produto da prateleira' : 'Esta prateleira está vazia';
         }
 
         // Mostrar modal
@@ -1380,17 +1431,24 @@
         // Mostrar modal de remoção
         function showRemoveModal() {
             const shelf = warehouseData.shelves.get(selectedShelf.position);
-            if (shelf && shelf.productId) {
-                const product = warehouseData.products.get(shelf.productId);
-                if (product) {
-                    document.getElementById('remove-product-name').textContent = product.name;
-                    document.getElementById('remove-product-sku').textContent = product.sku;
-                    document.getElementById('remove-product-quantity').textContent = `${product.quantity} ${product.unit}`;
-                    document.getElementById('remove-product-position').textContent = selectedShelf.position;
-                    
-                    const removeModal = document.getElementById('remove-modal');
-                    removeModal.style.display = 'flex';
-                }
+            
+            // Verificar se a prateleira está vazia
+            if (!shelf || shelf.status === 'available' || !shelf.productId) {
+                alert('Esta prateleira está vazia e não pode ser removida!');
+                return;
+            }
+            
+            const product = warehouseData.products.get(shelf.productId);
+            if (product) {
+                document.getElementById('remove-product-name').textContent = product.name;
+                document.getElementById('remove-product-sku').textContent = product.sku;
+                document.getElementById('remove-product-quantity').textContent = `${product.quantity} ${product.unit}`;
+                document.getElementById('remove-product-position').textContent = selectedShelf.position;
+                
+                const removeModal = document.getElementById('remove-modal');
+                removeModal.style.display = 'flex';
+            } else {
+                alert('Produto não encontrado nesta prateleira!');
             }
         }
 
@@ -1492,12 +1550,17 @@
             const position = selectedShelf.position;
             const shelf = warehouseData.shelves.get(position);
 
-            if (shelf.status === 'available') {
-                alert('Esta prateleira já está vazia!');
+            // Verificar se a prateleira está vazia
+            if (!shelf || shelf.status === 'available' || !shelf.productId) {
+                alert('Esta prateleira está vazia e não pode ser removida!');
                 return;
             }
 
             const product = warehouseData.products.get(shelf.productId);
+            if (!product) {
+                alert('Produto não encontrado nesta prateleira!');
+                return;
+            }
 
             warehouseData.products.delete(shelf.productId);
             warehouseData.shelves.set(position, {
