@@ -1142,6 +1142,9 @@
                 warehouseData.shelves = new Map(parsed.shelves);
                 warehouseData.products = new Map(parsed.products);
                 warehouseData.transactions = parsed.transactions;
+                
+                // Corrigir inconsistências de dados
+                fixDataInconsistencies();
             } else {
                 warehouseData.aisles.forEach(aisle => {
                     for (let gondola = 1; gondola <= aisle.gondolas; gondola++) {
@@ -1177,6 +1180,43 @@
                     }
                 });
                 saveData();
+            }
+        }
+
+        // Corrigir inconsistências de dados
+        function fixDataInconsistencies() {
+            let fixedCount = 0;
+            
+            // Verificar todas as prateleiras
+            for (const [position, shelf] of warehouseData.shelves) {
+                // Se a prateleira está marcada como ocupada mas não tem produto
+                if (shelf.status === 'occupied' && (!shelf.productId || !warehouseData.products.has(shelf.productId))) {
+                    // Corrigir para disponível (vermelho)
+                    warehouseData.shelves.set(position, {
+                        ...shelf,
+                        status: 'available',
+                        productId: null,
+                        lastUpdated: new Date().toISOString()
+                    });
+                    fixedCount++;
+                }
+                
+                // Se a prateleira está marcada como disponível mas tem produto
+                if (shelf.status === 'available' && shelf.productId && warehouseData.products.has(shelf.productId)) {
+                    // Corrigir para ocupada (verde)
+                    warehouseData.shelves.set(position, {
+                        ...shelf,
+                        status: 'occupied',
+                        lastUpdated: new Date().toISOString()
+                    });
+                    fixedCount++;
+                }
+            }
+            
+            // Se foram feitas correções, salvar os dados
+            if (fixedCount > 0) {
+                saveData();
+                console.log(`Corrigidas ${fixedCount} inconsistências de dados no armazém.`);
             }
         }
 
