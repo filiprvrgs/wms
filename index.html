@@ -1,13 +1,897 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema WMS - Gestão de Estoque</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(30, 60, 114, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-icon {
+            color: #1e3c72;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.3);
+            font-size: 40px;
+        }
+
+        .header h1 {
+            color: #1e3c72;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #5a6c7d;
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        .search-filter-section {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(30, 60, 114, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 15px 20px;
+            border: 2px solid rgba(30, 60, 114, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within {
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        }
+
+        .search-box i {
+            color: #1e3c72;
+            font-size: 18px;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .search-box input::placeholder {
+            color: #999;
+        }
+
+        .controls-section {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+        }
+
+        .warehouse-layout {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(30, 60, 114, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .aisle {
+            margin-bottom: 40px;
+        }
+
+        .aisle h3 {
+            color: #1e3c72;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gondolas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .gondola {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+            border: 1px solid rgba(30, 60, 114, 0.1);
+        }
+
+        .gondola-label {
+            text-align: center;
+            font-weight: 600;
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .levels {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .shelf {
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shelf.available {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        .shelf.occupied {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .shelf:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+        }
+
+        .shelf.selected {
+            border: 3px solid #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.2);
+        }
+
+        .shelf-info {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .shelf:hover .shelf-info {
+            opacity: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(30, 60, 114, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h3 {
+            color: #1e3c72;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(30, 60, 114, 0.1);
+            color: #1e3c72;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1e3c72;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid rgba(30, 60, 114, 0.1);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .gondolas {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 10px;
+            }
+
+            .shelf {
+                height: 35px;
+                font-size: 11px;
+            }
+
+            .controls-section {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .gondolas {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+                gap: 8px;
+            }
+
+            .shelf {
+                height: 30px;
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <div class="header-icon">
+                        <i class="fas fa-warehouse"></i>
+                    </div>
+                    <div>
+                        <h1>Sistema WMS</h1>
+                        <p>Gestão de Estoque Inteligente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Controls -->
+        <div class="search-filter-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Buscar prateleiras ou produtos...">
+            </div>
+            <div class="controls-section">
+                <button class="btn btn-primary" onclick="showModal('add')">
+                    <i class="fas fa-plus"></i>
+                    Adicionar Produto
+                </button>
+                <button class="btn btn-danger" onclick="showModal('remove')">
+                    <i class="fas fa-minus"></i>
+                    Remover Produto
+                </button>
+                <button class="btn btn-success" onclick="showModal('edit')">
+                    <i class="fas fa-edit"></i>
+                    Editar Produto
+                </button>
+            </div>
+        </div>
+
+        <!-- Warehouse Layout -->
+        <div class="warehouse-layout" id="warehouse-layout">
+            <!-- Layout será gerado aqui -->
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Adicionar Produto</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="product-form">
+                <div class="form-group">
+                    <label for="product-name">Nome do Produto</label>
+                    <input type="text" id="product-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="product-sku">SKU</label>
+                    <input type="text" id="product-sku" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-quantity">Quantidade</label>
+                        <input type="number" id="product-quantity" value="1" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-unit">Unidade</label>
+                        <select id="product-unit">
+                            <option value="un">Unidade</option>
+                            <option value="kg">Quilograma</option>
+                            <option value="l">Litro</option>
+                            <option value="m">Metro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="product-category">Categoria</label>
+                    <select id="product-category">
+                        <option value="Eletrônicos">Eletrônicos</option>
+                        <option value="Vestuário">Vestuário</option>
+                        <option value="Alimentos">Alimentos</option>
+                        <option value="Livros">Livros</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Descrição</label>
+                    <textarea id="product-description" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Dados do armazém
+        let warehouseData = {
+            aisles: [
+                { name: 'Rua A', gondolas: 20 },
+                { name: 'Rua B', gondolas: 20 },
+                { name: 'Rua C', gondolas: 20 },
+                { name: 'Rua D', gondolas: 20 },
+                { name: 'Rua E', gondolas: 20 },
+                { name: 'Rua F', gondolas: 20 }
+            ],
+            shelves: new Map(),
+            products: new Map(),
+            transactions: []
+        };
+
+        let selectedShelf = null;
+        let modalType = null;
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeWarehouse();
+            renderWarehouse();
+            setupEventListeners();
+        });
+
+        // Inicializar dados do armazém
+        function initializeWarehouse() {
+            // Carregar dados do localStorage se existirem
+            const savedData = localStorage.getItem('wmsData');
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+                warehouseData.aisles = parsed.aisles;
+                warehouseData.shelves = new Map(parsed.shelves);
+                warehouseData.products = new Map(parsed.products);
+                warehouseData.transactions = parsed.transactions;
+            } else {
+                // Gerar dados iniciais
+                warehouseData.aisles.forEach(aisle => {
+                    for (let gondola = 1; gondola <= aisle.gondolas; gondola++) {
+                        for (let level = 1; level <= 6; level++) {
+                            const position = `${aisle.name}-${gondola.toString().padStart(2, '0')}-${level.toString().padStart(2, '0')}`;
+                            const isOccupied = Math.random() < 0.25;
+                            
+                            warehouseData.shelves.set(position, {
+                                position,
+                                aisle: aisle.name,
+                                gondola,
+                                level,
+                                status: isOccupied ? 'occupied' : 'available',
+                                productId: isOccupied ? `PROD-${Math.floor(Math.random() * 1000)}` : null,
+                                lastUpdated: new Date().toISOString()
+                            });
+
+                            if (isOccupied) {
+                                const productId = `PROD-${Math.floor(Math.random() * 1000)}`;
+                                warehouseData.products.set(productId, {
+                                    id: productId,
+                                    name: 'Produto Exemplo',
+                                    sku: `SKU-${Math.floor(Math.random() * 1000)}`,
+                                    quantity: Math.floor(Math.random() * 50) + 10,
+                                    unit: 'un',
+                                    category: 'Eletrônicos',
+                                    description: 'Produto de exemplo para demonstração',
+                                    position,
+                                    createdAt: new Date().toISOString()
+                                });
+                            }
+                        }
+                    }
+                });
+                saveData();
+            }
+        }
+
+        // Salvar dados
+        function saveData() {
+            const data = {
+                aisles: warehouseData.aisles,
+                shelves: Array.from(warehouseData.shelves.entries()),
+                products: Array.from(warehouseData.products.entries()),
+                transactions: warehouseData.transactions
+            };
+            localStorage.setItem('wmsData', JSON.stringify(data));
+        }
+
+        // Renderizar armazém
+        function renderWarehouse() {
+            const layout = document.getElementById('warehouse-layout');
+            layout.innerHTML = warehouseData.aisles.map(aisle => `
+                <div class="aisle">
+                    <h3>${aisle.name}</h3>
+                    <div class="gondolas">
+                        ${Array.from({length: aisle.gondolas}, (_, i) => {
+                            const gondolaNum = i + 1;
+                            return `
+                                <div class="gondola">
+                                    <div class="gondola-label">G${gondolaNum.toString().padStart(2, '0')}</div>
+                                    <div class="levels">
+                                        ${Array.from({length: 6}, (_, j) => {
+                                            const levelNum = j + 1;
+                                            const position = `${aisle.name}-${gondolaNum.toString().padStart(2, '0')}-${levelNum.toString().padStart(2, '0')}`;
+                                            const shelf = warehouseData.shelves.get(position);
+                                            const product = shelf?.productId ? warehouseData.products.get(shelf.productId) : null;
+                                            
+                                            return `
+                                                <div class="shelf ${shelf?.status || 'available'}" 
+                                                     data-position="${position}"
+                                                     onclick="selectShelf(this, '${position}')">
+                                                    ${product ? `
+                                                        <div class="shelf-info">
+                                                            <small>${product.name}</small>
+                                                            <small>${product.quantity} ${product.unit}</small>
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Selecionar prateleira
+        function selectShelf(element, position) {
+            // Remover seleção anterior
+            document.querySelectorAll('.shelf.selected').forEach(s => s.classList.remove('selected'));
+            
+            // Selecionar nova prateleira
+            element.classList.add('selected');
+            selectedShelf = { element, position };
+        }
+
+        // Mostrar modal
+        function showModal(type) {
+            if (!selectedShelf && type !== 'add') {
+                alert('Selecione uma prateleira primeiro!');
+                return;
+            }
+
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modal-title');
+            const form = document.getElementById('product-form');
+
+            modalType = type;
+
+            if (type === 'add') {
+                title.textContent = 'Adicionar Produto';
+                form.reset();
+            } else if (type === 'remove') {
+                title.textContent = 'Remover Produto';
+                if (confirm('Tem certeza que deseja remover o produto desta prateleira?')) {
+                    removeProductFromShelf();
+                }
+                return;
+            } else if (type === 'edit') {
+                title.textContent = 'Editar Produto';
+                const shelf = warehouseData.shelves.get(selectedShelf.position);
+                if (shelf && shelf.productId) {
+                    const product = warehouseData.products.get(shelf.productId);
+                    if (product) {
+                        document.getElementById('product-name').value = product.name;
+                        document.getElementById('product-sku').value = product.sku;
+                        document.getElementById('product-quantity').value = product.quantity;
+                        document.getElementById('product-unit').value = product.unit;
+                        document.getElementById('product-category').value = product.category;
+                        document.getElementById('product-description').value = product.description || '';
+                    }
+                }
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        // Fechar modal
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+            modalType = null;
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Form submit
+            document.getElementById('product-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: document.getElementById('product-name').value,
+                    sku: document.getElementById('product-sku').value,
+                    quantity: parseInt(document.getElementById('product-quantity').value),
+                    unit: document.getElementById('product-unit').value,
+                    category: document.getElementById('product-category').value,
+                    description: document.getElementById('product-description').value
+                };
+
+                if (modalType === 'add') {
+                    addProductToShelf(formData);
+                } else if (modalType === 'edit') {
+                    editProductInShelf(formData);
+                }
+
+                closeModal();
+            });
+
+            // Search
+            document.getElementById('search-input').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                // Implementar busca se necessário
+            });
+        }
+
+        // Adicionar produto
+        function addProductToShelf(productData) {
+            if (!selectedShelf) {
+                alert('Selecione uma prateleira primeiro!');
+                return;
+            }
+
+            const position = selectedShelf.position;
+            const shelf = warehouseData.shelves.get(position);
+
+            if (shelf.status === 'occupied') {
+                alert('Esta prateleira já está ocupada!');
+                return;
+            }
+
+            const productId = `PROD-${Date.now()}`;
+            const product = {
+                id: productId,
+                ...productData,
+                position,
+                createdAt: new Date().toISOString()
+            };
+
+            // Atualizar dados
+            warehouseData.products.set(productId, product);
+            warehouseData.shelves.set(position, {
+                ...shelf,
+                status: 'occupied',
+                productId,
+                lastUpdated: new Date().toISOString()
+            });
+
+            // Adicionar transação
+            warehouseData.transactions.push({
+                id: `TXN-${Date.now()}`,
+                type: 'add',
+                position,
+                productId,
+                timestamp: new Date().toISOString(),
+                details: `Produto ${productData.name} adicionado à prateleira ${position}`
+            });
+
+            saveData();
+            renderWarehouse();
+            alert('Produto adicionado com sucesso!');
+        }
+
+        // Remover produto
+        function removeProductFromShelf() {
+            if (!selectedShelf) {
+                alert('Selecione uma prateleira primeiro!');
+                return;
+            }
+
+            const position = selectedShelf.position;
+            const shelf = warehouseData.shelves.get(position);
+
+            if (shelf.status === 'available') {
+                alert('Esta prateleira já está vazia!');
+                return;
+            }
+
+            const product = warehouseData.products.get(shelf.productId);
+
+            // Remover produto
+            warehouseData.products.delete(shelf.productId);
+            warehouseData.shelves.set(position, {
+                ...shelf,
+                status: 'available',
+                productId: null,
+                lastUpdated: new Date().toISOString()
+            });
+
+            // Adicionar transação
+            warehouseData.transactions.push({
+                id: `TXN-${Date.now()}`,
+                type: 'remove',
+                position,
+                productId: shelf.productId,
+                timestamp: new Date().toISOString(),
+                details: `Produto removido da prateleira ${position}`
+            });
+
+            saveData();
+            renderWarehouse();
+            alert('Produto removido com sucesso!');
+        }
+
+        // Editar produto
+        function editProductInShelf(productData) {
+            if (!selectedShelf) {
+                alert('Selecione uma prateleira primeiro!');
+                return;
+            }
+
+            const position = selectedShelf.position;
+            const shelf = warehouseData.shelves.get(position);
+
+            if (!shelf.productId) {
+                alert('Esta prateleira não tem produto para editar!');
+                return;
+            }
+
+            const product = warehouseData.products.get(shelf.productId);
+            if (!product) {
+                alert('Produto não encontrado!');
+                return;
+            }
+
+            // Atualizar produto
+            const updatedProduct = {
+                ...product,
+                ...productData,
+                updatedAt: new Date().toISOString()
+            };
+
+            warehouseData.products.set(shelf.productId, updatedProduct);
+
+            // Adicionar transação
+            warehouseData.transactions.push({
+                id: `TXN-${Date.now()}`,
+                type: 'edit',
+                position,
+                productId: shelf.productId,
+                timestamp: new Date().toISOString(),
+                details: `Produto ${productData.name} editado na prateleira ${position}`
+            });
+
+            saveData();
+            renderWarehouse();
+            alert('Produto editado com sucesso!');
+        }
+    </script>
+</body>
 </html> 
