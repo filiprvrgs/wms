@@ -516,6 +516,40 @@
                 display: block;
             }
 
+            .sidebar-close-btn {
+                display: block;
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: none;
+                border: none;
+                font-size: 24px;
+                color: #1e3c72;
+                cursor: pointer;
+                padding: 10px;
+                border-radius: 10px;
+                z-index: 1001;
+            }
+
+                    .sidebar-close-btn:hover {
+            background: rgba(30, 60, 114, 0.1);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
             .main-content {
                 padding: 15px;
             }
@@ -643,8 +677,14 @@
 </head>
 <body>
     <div class="app-container">
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+        
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
+            <button class="sidebar-close-btn" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="sidebar-header">
                 <i class="fas fa-warehouse"></i>
                 <h2>WMS</h2>
@@ -1433,7 +1473,9 @@
         // Mobile menu
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
             sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
         }
     </script>
 </body>
