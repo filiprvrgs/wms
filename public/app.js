@@ -8,54 +8,19 @@ let appState = {
     filterType: 'all'
 };
 
-// Elementos DOM
-const elements = {
-    // Navegação
-    navItems: document.querySelectorAll('.nav-item'),
-    contentSections: document.querySelectorAll('.content-section'),
-    pageTitle: document.getElementById('page-title'),
-    pageDescription: document.getElementById('page-description'),
-    
-    // Dashboard
-    totalShelves: document.getElementById('total-shelves'),
-    availableShelves: document.getElementById('available-shelves'),
-    occupiedShelves: document.getElementById('occupied-shelves'),
-    occupancyRate: document.getElementById('occupancy-rate'),
-    recentActivity: document.getElementById('recent-activity'),
-    alertsList: document.getElementById('alerts-list'),
-    
-    // Warehouse
-    warehouseLayout: document.getElementById('warehouse-layout'),
-    addProductBtn: document.getElementById('add-product-btn'),
-    removeProductBtn: document.getElementById('remove-product-btn'),
-    editProductBtn: document.getElementById('edit-product-btn'),
-    
-    // Products
-    productsGrid: document.getElementById('products-grid'),
-    addNewProductBtn: document.getElementById('add-new-product-btn'),
-    
-    // Transactions
-    transactionsList: document.getElementById('transactions-list'),
-    transactionFilter: document.getElementById('transaction-filter'),
-    
-    // Search
-    searchInput: document.getElementById('search-input'),
-    
-    // Modals
-    productModal: document.getElementById('product-modal'),
-    confirmModal: document.getElementById('confirm-modal'),
-    modalTitle: document.getElementById('modal-title'),
-    modalClose: document.getElementById('modal-close'),
-    confirmTitle: document.getElementById('confirm-title'),
-    confirmMessage: document.getElementById('confirm-message'),
-    confirmClose: document.getElementById('confirm-close'),
-    confirmCancel: document.getElementById('confirm-cancel'),
-    confirmOk: document.getElementById('confirm-ok'),
-    
-    // Forms
-    productForm: document.getElementById('product-form'),
-    modalCancel: document.getElementById('modal-cancel'),
-    modalSave: document.getElementById('modal-save')
+// Dados locais do armazém
+let warehouseData = {
+    aisles: [
+        { name: 'Rua A', gondolas: 20 },
+        { name: 'Rua B', gondolas: 20 },
+        { name: 'Rua C', gondolas: 20 },
+        { name: 'Rua D', gondolas: 20 },
+        { name: 'Rua E', gondolas: 20 },
+        { name: 'Rua F', gondolas: 20 }
+    ],
+    shelves: new Map(),
+    products: new Map(),
+    transactions: []
 };
 
 // Inicialização da aplicação
@@ -68,13 +33,83 @@ document.addEventListener('DOMContentLoaded', function() {
 // Inicializar aplicação
 function initializeApp() {
     console.log('🚀 Inicializando Sistema WMS...');
+    initializeWarehouse();
     updatePageContent('dashboard');
+}
+
+// Inicializar dados do armazém
+function initializeWarehouse() {
+    // Carregar dados do localStorage se existirem
+    const savedData = localStorage.getItem('wmsData');
+    if (savedData) {
+        const parsed = JSON.parse(savedData);
+        warehouseData.aisles = parsed.aisles;
+        warehouseData.shelves = new Map(parsed.shelves);
+        warehouseData.products = new Map(parsed.products);
+        warehouseData.transactions = parsed.transactions;
+    } else {
+        // Gerar dados iniciais
+        warehouseData.aisles.forEach(aisle => {
+            for (let gondola = 1; gondola <= aisle.gondolas; gondola++) {
+                for (let level = 1; level <= 6; level++) {
+                    const position = `${aisle.name}-${gondola.toString().padStart(2, '0')}-${level.toString().padStart(2, '0')}`;
+                    const isOccupied = Math.random() < 0.25;
+                    
+                    warehouseData.shelves.set(position, {
+                        position,
+                        aisle: aisle.name,
+                        gondola,
+                        level,
+                        status: isOccupied ? 'occupied' : 'available',
+                        productId: isOccupied ? `PROD-${Math.floor(Math.random() * 1000)}` : null,
+                        lastUpdated: new Date().toISOString()
+                    });
+
+                    if (isOccupied) {
+                        const productId = `PROD-${Math.floor(Math.random() * 1000)}`;
+                        warehouseData.products.set(productId, {
+                            id: productId,
+                            name: 'Produto Exemplo',
+                            sku: `SKU-${Math.floor(Math.random() * 1000)}`,
+                            quantity: Math.floor(Math.random() * 50) + 10,
+                            unit: 'un',
+                            category: 'Eletrônicos',
+                            description: 'Produto de exemplo para demonstração',
+                            position,
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                }
+            }
+        });
+        saveData();
+    }
+}
+
+// Salvar dados no localStorage
+function saveData() {
+    const data = {
+        aisles: warehouseData.aisles,
+        shelves: Array.from(warehouseData.shelves.entries()),
+        products: Array.from(warehouseData.products.entries()),
+        transactions: warehouseData.transactions
+    };
+    localStorage.setItem('wmsData', JSON.stringify(data));
 }
 
 // Configurar event listeners
 function setupEventListeners() {
+    // Navegação
+    const navLinks = document.querySelectorAll('.nav-links li');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            const page = link.dataset.page;
+            switchPage(page);
+        });
+    });
+
     // Mobile menu
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const sidebar = document.querySelector('.sidebar');
     
     if (mobileMenuBtn) {
@@ -82,355 +117,268 @@ function setupEventListeners() {
             sidebar.classList.toggle('open');
         });
     }
-    
-    // Fechar sidebar ao clicar em um item (mobile)
-    elements.navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            const section = item.dataset.section;
-            switchSection(section);
-            
-            // Fechar sidebar no mobile
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove('open');
+
+    // Search
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', handleSearch);
+    }
+
+    // Filter
+    const filterSelect = document.getElementById('filter-select');
+    if (filterSelect) {
+        filterSelect.addEventListener('change', handleFilter);
+    }
+
+    // Modal
+    const modal = document.getElementById('modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
             }
         });
-    });
-    
-    // Warehouse controls
-    elements.addProductBtn.addEventListener('click', () => openProductModal('add'));
-    elements.removeProductBtn.addEventListener('click', () => openProductModal('remove'));
-    elements.editProductBtn.addEventListener('click', () => openProductModal('edit'));
-    elements.addNewProductBtn.addEventListener('click', () => openProductModal('add'));
-    
-    // Search
-    elements.searchInput.addEventListener('input', handleSearch);
-    
-    // Transaction filter
-    elements.transactionFilter.addEventListener('change', handleTransactionFilter);
-    
-    // Modal events
-    elements.modalClose.addEventListener('click', closeProductModal);
-    elements.confirmClose.addEventListener('click', closeConfirmModal);
-    elements.confirmCancel.addEventListener('click', closeConfirmModal);
-    elements.modalCancel.addEventListener('click', closeProductModal);
-    elements.productForm.addEventListener('submit', handleProductFormSubmit);
-    
-    // Close modals on outside click
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            closeProductModal();
-            closeConfirmModal();
-        }
-    });
-}
+    }
 
-// Carregar dados do armazém
-async function loadWarehouseData() {
-    try {
-        const response = await fetch('/api/warehouse');
-        const data = await response.json();
-        
-        appState.warehouse = data;
-        updateDashboardStats(data.stats);
-        updateRecentActivity(data.transactions);
-        renderWarehouseLayout(data);
-        renderProductsGrid(data.products);
-        renderTransactionsList(data.transactions);
-        
-        console.log('✅ Dados do armazém carregados com sucesso');
-    } catch (error) {
-        console.error('❌ Erro ao carregar dados:', error);
-        showAlert('Erro ao carregar dados do armazém', 'error');
+    // Form
+    const productForm = document.getElementById('product-form');
+    if (productForm) {
+        productForm.addEventListener('submit', handleProductSubmit);
     }
 }
 
-// Trocar seção
-function switchSection(section) {
-    // Atualizar navegação
-    elements.navItems.forEach(item => {
-        item.classList.remove('active');
-        if (item.dataset.section === section) {
-            item.classList.add('active');
-        }
-    });
+// Trocar página
+function switchPage(page) {
+    // Remover active de todos os links
+    document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     
-    // Atualizar conteúdo
-    elements.contentSections.forEach(content => {
-        content.classList.remove('active');
-        if (content.id === `${section}-section`) {
-            content.classList.add('active');
-        }
-    });
+    // Adicionar active ao link clicado
+    document.querySelector(`[data-page="${page}"]`).classList.add('active');
+    document.getElementById(page).classList.add('active');
     
-    // Atualizar página
-    updatePageContent(section);
-    appState.currentSection = section;
+    // Carregar conteúdo da página
+    loadPageContent(page);
 }
 
-// Atualizar conteúdo da página
-function updatePageContent(section) {
-    const pageConfig = {
-        dashboard: {
-            title: 'Dashboard',
-            description: 'Visão geral do sistema de gestão de estoque'
-        },
-        warehouse: {
-            title: 'Layout do Armazém',
-            description: 'Visualize e gerencie as prateleiras do armazém'
-        },
-        products: {
-            title: 'Gerenciamento de Produtos',
-            description: 'Gerencie produtos e estoques'
-        },
-        transactions: {
-            title: 'Histórico de Transações',
-            description: 'Acompanhe todas as movimentações do armazém'
-        },
-        reports: {
-            title: 'Relatórios e Analytics',
-            description: 'Analise dados e gere relatórios'
-        }
+// Carregar conteúdo da página
+function loadPageContent(page) {
+    switch(page) {
+        case 'dashboard':
+            loadDashboard();
+            break;
+        case 'warehouse':
+            loadWarehouse();
+            break;
+        case 'products':
+            loadProducts();
+            break;
+        case 'transactions':
+            loadTransactions();
+            break;
+        case 'reports':
+            loadReports();
+            break;
+    }
+}
+
+// Carregar dashboard
+function loadDashboard() {
+    const stats = {
+        total: warehouseData.shelves.size,
+        available: Array.from(warehouseData.shelves.values()).filter(s => s.status === 'available').length,
+        occupied: Array.from(warehouseData.shelves.values()).filter(s => s.status === 'occupied').length,
+        occupancyRate: ((Array.from(warehouseData.shelves.values()).filter(s => s.status === 'occupied').length / warehouseData.shelves.size) * 100).toFixed(1)
     };
-    
-    const config = pageConfig[section];
-    if (config) {
-        elements.pageTitle.textContent = config.title;
-        elements.pageDescription.textContent = config.description;
-    }
-}
 
-// Atualizar estatísticas do dashboard
-function updateDashboardStats(stats) {
-    elements.totalShelves.textContent = stats.total;
-    elements.availableShelves.textContent = stats.available;
-    elements.occupiedShelves.textContent = stats.occupied;
-    elements.occupancyRate.textContent = `${stats.occupancyRate}%`;
-}
+    document.getElementById('total-shelves').textContent = stats.total;
+    document.getElementById('available-shelves').textContent = stats.available;
+    document.getElementById('occupied-shelves').textContent = stats.occupied;
+    document.getElementById('occupancy-rate').textContent = stats.occupancyRate + '%';
 
-// Atualizar atividade recente
-function updateRecentActivity(transactions) {
-    const recentTransactions = transactions.slice(-5).reverse();
-    
-    elements.recentActivity.innerHTML = recentTransactions.map(transaction => {
-        const iconClass = getTransactionIconClass(transaction.type);
-        const time = formatTime(transaction.timestamp);
-        
-        return `
+    // Carregar atividade recente
+    const recentActivity = document.getElementById('recent-activity');
+    if (recentActivity) {
+        const recentTransactions = warehouseData.transactions.slice(-5).reverse();
+        recentActivity.innerHTML = recentTransactions.map(txn => `
             <div class="activity-item">
-                <div class="activity-icon ${iconClass}">
-                    <i class="fas ${getTransactionIcon(transaction.type)}"></i>
-                </div>
-                <div class="activity-content">
-                    <div class="activity-title">${transaction.details}</div>
-                    <div class="activity-time">${time}</div>
+                <i class="fas ${getTransactionIcon(txn.type)}"></i>
+                <div class="activity-info">
+                    <p>${txn.details}</p>
+                    <small>${formatTime(txn.timestamp)}</small>
                 </div>
             </div>
-        `;
-    }).join('');
+        `).join('') || '<p>Nenhuma atividade recente</p>';
+    }
 }
 
-// Renderizar layout do armazém
-function renderWarehouseLayout(data) {
-    elements.warehouseLayout.innerHTML = '';
-    
-    data.aisles.forEach(aisle => {
-        const aisleElement = document.createElement('div');
-        aisleElement.className = 'aisle';
-        
-        const aisleLabel = document.createElement('div');
-        aisleLabel.className = 'aisle-label';
-        aisleLabel.textContent = aisle.name;
-        
-        const shelfRow = document.createElement('div');
-        shelfRow.className = 'shelf-row';
-        
-        // Criar gôndolas
-        for (let gondola = 1; gondola <= aisle.gondolas; gondola++) {
-            const shelfColumn = document.createElement('div');
-            shelfColumn.className = 'shelf-column';
-            
-            const gondolaLabel = document.createElement('div');
-            gondolaLabel.className = 'gondola-label';
-            gondolaLabel.textContent = `G${gondola}`;
-            shelfColumn.appendChild(gondolaLabel);
-            
-            // Criar níveis
-            for (let level = 1; level <= 6; level++) {
-                const position = `${aisle.name}-${gondola.toString().padStart(2, '0')}-${level.toString().padStart(2, '0')}`;
-                const shelf = data.shelves.find(s => s.position === position);
-                
-                const shelfElement = document.createElement('div');
-                shelfElement.className = `shelf-item ${shelf ? shelf.status : 'available'}`;
-                shelfElement.textContent = `${aisle.name.charAt(4)}-${gondola.toString().padStart(2, '0')}-${level.toString().padStart(2, '0')}`;
-                shelfElement.dataset.position = position;
-                shelfElement.title = `${aisle.name} - Gôndola ${gondola} - Nível ${level}`;
-                
-                shelfElement.addEventListener('click', () => selectShelf(shelfElement, shelf));
-                shelfColumn.appendChild(shelfElement);
-            }
-            
-            shelfRow.appendChild(shelfColumn);
-        }
-        
-        aisleElement.appendChild(aisleLabel);
-        aisleElement.appendChild(shelfRow);
-        elements.warehouseLayout.appendChild(aisleElement);
-    });
+// Carregar layout do armazém
+function loadWarehouse() {
+    const layout = document.getElementById('warehouse-layout');
+    if (!layout) return;
+
+    layout.innerHTML = warehouseData.aisles.map(aisle => `
+        <div class="aisle">
+            <h3>${aisle.name}</h3>
+            <div class="gondolas">
+                ${Array.from({length: aisle.gondolas}, (_, i) => {
+                    const gondolaNum = i + 1;
+                    return `
+                        <div class="gondola">
+                            <div class="gondola-label">G${gondolaNum.toString().padStart(2, '0')}</div>
+                            <div class="levels">
+                                ${Array.from({length: 6}, (_, j) => {
+                                    const levelNum = j + 1;
+                                    const position = `${aisle.name}-${gondolaNum.toString().padStart(2, '0')}-${levelNum.toString().padStart(2, '0')}`;
+                                    const shelf = warehouseData.shelves.get(position);
+                                    const product = shelf?.productId ? warehouseData.products.get(shelf.productId) : null;
+                                    
+                                    return `
+                                        <div class="shelf ${shelf?.status || 'available'}" 
+                                             data-position="${position}"
+                                             onclick="selectShelf(this, '${position}')">
+                                            ${product ? `
+                                                <div class="shelf-info">
+                                                    <small>${product.name}</small>
+                                                    <small>${product.quantity} ${product.unit}</small>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `).join('');
 }
 
 // Selecionar prateleira
-function selectShelf(element, shelfData) {
+function selectShelf(element, position) {
     // Remover seleção anterior
-    document.querySelectorAll('.shelf-item.selected').forEach(item => {
-        item.classList.remove('selected');
-    });
+    document.querySelectorAll('.shelf.selected').forEach(s => s.classList.remove('selected'));
     
     // Selecionar nova prateleira
     element.classList.add('selected');
-    appState.selectedShelf = { element, data: shelfData };
     
-    console.log('Prateleira selecionada:', shelfData);
+    const shelf = warehouseData.shelves.get(position);
+    const product = shelf?.productId ? warehouseData.products.get(shelf.productId) : null;
+    
+    // Mostrar informações da prateleira
+    showShelfInfo(position, shelf, product);
 }
 
-// Renderizar grid de produtos
-function renderProductsGrid(products) {
-    elements.productsGrid.innerHTML = products.map(product => {
-        const statusClass = product.position ? 'occupied' : 'available';
-        const statusText = product.position ? 'Ocupado' : 'Disponível';
-        
-        return `
-            <div class="product-card">
-                <div class="product-header">
-                    <div>
-                        <div class="product-name">${product.name}</div>
-                        <div class="product-sku">${product.sku}</div>
-                    </div>
-                    <div class="product-status ${statusClass}">${statusText}</div>
-                </div>
-                <div class="product-details">
-                    <div class="product-detail">
-                        <span>Quantidade:</span>
-                        <span>${product.quantity} ${product.unit}</span>
-                    </div>
-                    <div class="product-detail">
-                        <span>Categoria:</span>
-                        <span>${product.category}</span>
-                    </div>
-                    <div class="product-detail">
-                        <span>Posição:</span>
-                        <span>${product.position || 'N/A'}</span>
-                    </div>
-                </div>
-                <div class="product-actions">
-                    <button class="btn btn-success" onclick="editProduct('${product.id}')">
-                        <i class="fas fa-edit"></i> Editar
-                    </button>
-                    ${product.position ? `
-                        <button class="btn btn-danger" onclick="removeProduct('${product.id}')">
-                            <i class="fas fa-trash"></i> Remover
-                        </button>
-                    ` : ''}
-                </div>
+// Mostrar informações da prateleira
+function showShelfInfo(position, shelf, product) {
+    const info = `
+        <div class="shelf-details">
+            <h4>Prateleira ${position}</h4>
+            <p>Status: ${shelf?.status === 'occupied' ? 'Ocupada' : 'Disponível'}</p>
+            ${product ? `
+                <p>Produto: ${product.name}</p>
+                <p>Quantidade: ${product.quantity} ${product.unit}</p>
+                <p>SKU: ${product.sku}</p>
+            ` : ''}
+            <div class="shelf-actions">
+                ${shelf?.status === 'available' ? 
+                    '<button onclick="showModal(\'add\')" class="btn btn-primary">Adicionar Produto</button>' :
+                    '<button onclick="showModal(\'remove\')" class="btn btn-danger">Remover Produto</button>'
+                }
             </div>
-        `;
-    }).join('');
+        </div>
+    `;
+    
+    // Criar ou atualizar painel de informações
+    let infoPanel = document.querySelector('.shelf-info-panel');
+    if (!infoPanel) {
+        infoPanel = document.createElement('div');
+        infoPanel.className = 'shelf-info-panel';
+        document.querySelector('.warehouse-layout').appendChild(infoPanel);
+    }
+    infoPanel.innerHTML = info;
 }
 
-// Renderizar lista de transações
-function renderTransactionsList(transactions) {
-    elements.transactionsList.innerHTML = transactions.map(transaction => {
-        const iconClass = getTransactionIconClass(transaction.type);
-        const time = formatTime(transaction.timestamp);
-        
-        return `
-            <div class="transaction-item">
-                <div class="transaction-icon ${iconClass}">
-                    <i class="fas ${getTransactionIcon(transaction.type)}"></i>
-                </div>
-                <div class="transaction-content">
-                    <div class="transaction-title">${transaction.details}</div>
-                    <div class="transaction-details">Prateleira: ${transaction.position}</div>
-                </div>
-                <div class="transaction-time">${time}</div>
+// Carregar produtos
+function loadProducts() {
+    const grid = document.getElementById('products-grid');
+    if (!grid) return;
+
+    const products = Array.from(warehouseData.products.values());
+    grid.innerHTML = products.map(product => `
+        <div class="product-card">
+            <div class="product-header">
+                <h4>${product.name}</h4>
+                <span class="product-sku">${product.sku}</span>
             </div>
-        `;
-    }).join('');
+            <div class="product-info">
+                <p><strong>Quantidade:</strong> ${product.quantity} ${product.unit}</p>
+                <p><strong>Categoria:</strong> ${product.category}</p>
+                <p><strong>Posição:</strong> ${product.position}</p>
+            </div>
+            <div class="product-actions">
+                <button onclick="editProduct('${product.id}')" class="btn btn-secondary">Editar</button>
+            </div>
+        </div>
+    `).join('') || '<p>Nenhum produto cadastrado</p>';
 }
 
-// Abrir modal de produto
-function openProductModal(type) {
-    if (type === 'add' && !appState.selectedShelf) {
-        showAlert('Selecione uma prateleira primeiro', 'warning');
+// Carregar transações
+function loadTransactions() {
+    const list = document.getElementById('transactions-list');
+    if (!list) return;
+
+    const transactions = warehouseData.transactions.slice().reverse();
+    list.innerHTML = transactions.map(txn => `
+        <div class="transaction-item">
+            <div class="transaction-icon ${getTransactionIconClass(txn.type)}">
+                <i class="fas ${getTransactionIcon(txn.type)}"></i>
+            </div>
+            <div class="transaction-info">
+                <p>${txn.details}</p>
+                <small>${formatTime(txn.timestamp)}</small>
+            </div>
+        </div>
+    `).join('') || '<p>Nenhuma transação encontrada</p>';
+}
+
+// Carregar relatórios
+function loadReports() {
+    // Implementar relatórios se necessário
+}
+
+// Mostrar modal
+function showModal(type) {
+    const modal = document.getElementById('modal');
+    const title = document.getElementById('modal-title');
+    const form = document.getElementById('product-form');
+    
+    if (type === 'add') {
+        title.textContent = 'Adicionar Produto';
+        form.reset();
+    } else if (type === 'remove') {
+        title.textContent = 'Remover Produto';
+        // Implementar confirmação de remoção
+        if (confirm('Tem certeza que deseja remover o produto desta prateleira?')) {
+            removeProductFromShelf();
+        }
         return;
     }
     
-    if (type === 'remove' && (!appState.selectedShelf || appState.selectedShelf.data.status === 'available')) {
-        showAlert('Selecione uma prateleira ocupada para remover', 'warning');
-        return;
-    }
-    
-    if (type === 'edit' && (!appState.selectedShelf || appState.selectedShelf.data.status === 'available')) {
-        showAlert('Selecione uma prateleira ocupada para editar', 'warning');
-        return;
-    }
-    
+    modal.style.display = 'flex';
     appState.modalType = type;
-    
-    switch (type) {
-        case 'add':
-            elements.modalTitle.textContent = 'Adicionar Produto';
-            elements.productForm.reset();
-            break;
-        case 'remove':
-            showConfirmModal(
-                'Remover Produto',
-                `Tem certeza que deseja remover o produto da prateleira ${appState.selectedShelf.data.position}?`,
-                () => removeProductFromShelf()
-            );
-            return;
-        case 'edit':
-            elements.modalTitle.textContent = 'Editar Produto';
-            fillProductForm(appState.selectedShelf.data.productId);
-            break;
-    }
-    
-    elements.productModal.classList.add('show');
 }
 
-// Fechar modal de produto
-function closeProductModal() {
-    elements.productModal.classList.remove('show');
+// Fechar modal
+function closeModal() {
+    const modal = document.getElementById('modal');
+    modal.style.display = 'none';
     appState.modalType = null;
 }
 
-// Mostrar modal de confirmação
-function showConfirmModal(title, message, onConfirm) {
-    elements.confirmTitle.textContent = title;
-    elements.confirmMessage.textContent = message;
-    elements.confirmOk.onclick = onConfirm;
-    elements.confirmModal.classList.add('show');
-}
-
-// Fechar modal de confirmação
-function closeConfirmModal() {
-    elements.confirmModal.classList.remove('show');
-}
-
-// Preencher formulário de produto
-function fillProductForm(productId) {
-    const product = appState.warehouse.products.find(p => p.id === productId);
-    if (product) {
-        document.getElementById('product-name').value = product.name;
-        document.getElementById('product-sku').value = product.sku;
-        document.getElementById('product-quantity').value = product.quantity;
-        document.getElementById('product-unit').value = product.unit;
-        document.getElementById('product-category').value = product.category;
-        document.getElementById('product-description').value = product.description || '';
-    }
-}
-
 // Manipular envio do formulário
-async function handleProductFormSubmit(e) {
+function handleProductSubmit(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
@@ -443,180 +391,156 @@ async function handleProductFormSubmit(e) {
         description: formData.get('product-description') || document.getElementById('product-description').value
     };
     
-    try {
-        if (appState.modalType === 'add') {
-            await addProductToShelf(productData);
-        } else if (appState.modalType === 'edit') {
-            await editProductInShelf(productData);
-        }
-        
-        closeProductModal();
-        await loadWarehouseData();
-        showAlert('Operação realizada com sucesso!', 'success');
-    } catch (error) {
-        console.error('Erro na operação:', error);
-        showAlert('Erro ao realizar operação', 'error');
+    if (appState.modalType === 'add') {
+        addProductToShelf(productData);
     }
+    
+    closeModal();
 }
 
 // Adicionar produto à prateleira
-async function addProductToShelf(productData) {
-    const position = appState.selectedShelf.data.position;
-    
-    const response = await fetch(`/api/shelf/${position}/occupy`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(productData)
-    });
-    
-    if (!response.ok) {
-        throw new Error('Erro ao adicionar produto');
+function addProductToShelf(productData) {
+    const selectedShelf = document.querySelector('.shelf.selected');
+    if (!selectedShelf) {
+        alert('Selecione uma prateleira primeiro!');
+        return;
     }
     
-    return response.json();
+    const position = selectedShelf.dataset.position;
+    const shelf = warehouseData.shelves.get(position);
+    
+    if (shelf.status === 'occupied') {
+        alert('Esta prateleira já está ocupada!');
+        return;
+    }
+    
+    const productId = `PROD-${Date.now()}`;
+    const product = {
+        id: productId,
+        ...productData,
+        position,
+        createdAt: new Date().toISOString()
+    };
+    
+    // Atualizar dados
+    warehouseData.products.set(productId, product);
+    warehouseData.shelves.set(position, {
+        ...shelf,
+        status: 'occupied',
+        productId,
+        lastUpdated: new Date().toISOString()
+    });
+    
+    // Adicionar transação
+    warehouseData.transactions.push({
+        id: `TXN-${Date.now()}`,
+        type: 'add',
+        position,
+        productId,
+        timestamp: new Date().toISOString(),
+        details: `Produto ${productData.name} adicionado à prateleira ${position}`
+    });
+    
+    saveData();
+    loadPageContent(appState.currentSection);
+    alert('Produto adicionado com sucesso!');
 }
 
 // Remover produto da prateleira
-async function removeProductFromShelf() {
-    const position = appState.selectedShelf.data.position;
-    
-    const response = await fetch(`/api/shelf/${position}/vacate`, {
-        method: 'POST'
-    });
-    
-    if (!response.ok) {
-        throw new Error('Erro ao remover produto');
+function removeProductFromShelf() {
+    const selectedShelf = document.querySelector('.shelf.selected');
+    if (!selectedShelf) {
+        alert('Selecione uma prateleira primeiro!');
+        return;
     }
     
-    closeConfirmModal();
-    await loadWarehouseData();
-    showAlert('Produto removido com sucesso!', 'success');
+    const position = selectedShelf.dataset.position;
+    const shelf = warehouseData.shelves.get(position);
     
-    return response.json();
+    if (shelf.status === 'available') {
+        alert('Esta prateleira já está vazia!');
+        return;
+    }
+    
+    const product = warehouseData.products.get(shelf.productId);
+    
+    // Remover produto
+    warehouseData.products.delete(shelf.productId);
+    warehouseData.shelves.set(position, {
+        ...shelf,
+        status: 'available',
+        productId: null,
+        lastUpdated: new Date().toISOString()
+    });
+    
+    // Adicionar transação
+    warehouseData.transactions.push({
+        id: `TXN-${Date.now()}`,
+        type: 'remove',
+        position,
+        productId: shelf.productId,
+        timestamp: new Date().toISOString(),
+        details: `Produto removido da prateleira ${position}`
+    });
+    
+    saveData();
+    loadPageContent(appState.currentSection);
+    alert('Produto removido com sucesso!');
 }
 
-// Editar produto na prateleira
-async function editProductInShelf(productData) {
-    const productId = appState.selectedShelf.data.productId;
+// Editar produto
+function editProduct(productId) {
+    const product = warehouseData.products.get(productId);
+    if (!product) return;
     
-    const response = await fetch(`/api/product/${productId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(productData)
-    });
+    // Preencher formulário
+    document.getElementById('product-name').value = product.name;
+    document.getElementById('product-sku').value = product.sku;
+    document.getElementById('product-quantity').value = product.quantity;
+    document.getElementById('product-unit').value = product.unit;
+    document.getElementById('product-category').value = product.category;
+    document.getElementById('product-description').value = product.description;
     
-    if (!response.ok) {
-        throw new Error('Erro ao editar produto');
-    }
-    
-    return response.json();
+    showModal('edit');
 }
 
 // Manipular busca
 function handleSearch(e) {
-    appState.searchTerm = e.target.value.toLowerCase();
-    // Implementar busca em tempo real
-    console.log('Busca:', appState.searchTerm);
+    const searchTerm = e.target.value.toLowerCase();
+    // Implementar busca se necessário
 }
 
-// Manipular filtro de transações
-function handleTransactionFilter(e) {
-    appState.filterType = e.target.value;
-    // Implementar filtro de transações
-    console.log('Filtro:', appState.filterType);
+// Manipular filtro
+function handleFilter(e) {
+    const filterType = e.target.value;
+    // Implementar filtro se necessário
 }
 
 // Funções auxiliares
 function getTransactionIcon(type) {
-    const icons = {
-        add: 'fa-plus',
-        remove: 'fa-minus',
-        edit: 'fa-edit'
-    };
-    return icons[type] || 'fa-info';
+    switch(type) {
+        case 'add': return 'fa-plus-circle';
+        case 'remove': return 'fa-minus-circle';
+        case 'edit': return 'fa-edit';
+        default: return 'fa-info-circle';
+    }
 }
 
 function getTransactionIconClass(type) {
-    return type;
+    switch(type) {
+        case 'add': return 'success';
+        case 'remove': return 'danger';
+        case 'edit': return 'warning';
+        default: return 'info';
+    }
 }
 
 function formatTime(timestamp) {
-    const date = new Date(timestamp);
-    return date.toLocaleString('pt-BR');
+    return new Date(timestamp).toLocaleString('pt-BR');
 }
 
-function showAlert(message, type = 'info') {
-    // Implementar sistema de alertas
-    console.log(`${type.toUpperCase()}: ${message}`);
-    
-    // Criar alerta visual
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type}`;
-    alert.textContent = message;
-    alert.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        color: white;
-        font-weight: 600;
-        z-index: 3000;
-        animation: slideIn 0.3s ease;
-    `;
-    
-    // Cores por tipo
-    const colors = {
-        success: '#10b981',
-        error: '#ef4444',
-        warning: '#f59e0b',
-        info: '#3b82f6'
-    };
-    
-    alert.style.background = colors[type] || colors.info;
-    
-    document.body.appendChild(alert);
-    
-    // Remover após 3 segundos
-    setTimeout(() => {
-        alert.remove();
-    }, 3000);
-}
-
-// Funções globais para uso nos botões
-window.editProduct = function(productId) {
-    const product = appState.warehouse.products.find(p => p.id === productId);
-    if (product) {
-        appState.selectedShelf = {
-            element: null,
-            data: { productId, status: 'occupied' }
-        };
-        openProductModal('edit');
-    }
-};
-
-window.removeProduct = function(productId) {
-    const product = appState.warehouse.products.find(p => p.id === productId);
-    if (product) {
-        appState.selectedShelf = {
-            element: null,
-            data: { productId, status: 'occupied' }
-        };
-        showConfirmModal(
-            'Remover Produto',
-            `Tem certeza que deseja remover o produto "${product.name}"?`,
-            () => removeProductFromShelf()
-        );
-    }
-};
-
-// Atualizar dados periodicamente
-setInterval(() => {
-    if (appState.currentSection === 'dashboard') {
-        loadWarehouseData();
-    }
-}, 30000); // Atualizar a cada 30 segundos 
+// Carregar dados do armazém
+function loadWarehouseData() {
+    // Dados já são carregados na inicialização
+    loadPageContent('dashboard');
+} 
