@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('.'));
 app.use(express.urlencoded({ extended: true }));
 
 // Dados do armazém em memória
@@ -66,7 +66,7 @@ function initializeWarehouse() {
 
 // Rotas
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.get('/api/warehouse', (req, res) => {

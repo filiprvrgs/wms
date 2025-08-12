@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema WMS Completo</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <style>
         * {
             margin: 0;
             padding: 0;
@@ -285,70 +287,1004 @@
 
         /* Buttons */
         .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 8px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #1e3c72, #2a5298);
-            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+            box-shadow: 0 6px 20px rgba(30, 60, 114, 0.3), 0 2px 8px rgba(42, 82, 152, 0.2);
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.4);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(30, 60, 114, 0.4), 0 4px 15px rgba(42, 82, 152, 0.3);
+            background: linear-gradient(135deg, #2a5298, #1e3c72);
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            background: linear-gradient(135deg, #dc3545, #ff6b6b);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3), 0 2px 8px rgba(255, 107, 107, 0.2);
         }
 
         .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(220, 53, 69, 0.4), 0 4px 15px rgba(255, 107, 107, 0.3);
+            background: linear-gradient(135deg, #ff6b6b, #dc3545);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            background: linear-gradient(135deg, #28a745, #4ECDC4);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3), 0 2px 8px rgba(78, 205, 196, 0.2);
         }
 
         .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(40, 167, 69, 0.4), 0 4px 15px rgba(78, 205, 196, 0.3);
+            background: linear-gradient(135deg, #4ECDC4, #28a745);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #6c757d, #5a6268);
-            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+            background: linear-gradient(135deg, #6c757d, #95a5a6);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3), 0 2px 8px rgba(149, 165, 166, 0.2);
         }
 
         .btn-secondary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(108, 117, 125, 0.4), 0 4px 15px rgba(149, 165, 166, 0.3);
+            background: linear-gradient(135deg, #95a5a6, #6c757d);
+        }
+
+
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        /* Estilos para Auditoria */
+        .audit-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .audit-summary {
+            padding: 20px 0;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-item h4 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .stat-item span {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2a5298;
+        }
+
+        .audit-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .audit-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .audit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .audit-header h4 {
+            color: #1e3c72;
+            margin: 0;
+        }
+
+        .audit-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .audit-details p {
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+        }
+
+        /* Estilos para o Cronograma de Auditorias */
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .schedule-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .schedule-filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .schedule-filters select {
+            padding: 10px 15px;
+            border: 2px solid rgba(30, 60, 114, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e3c72;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .schedule-filters select:focus {
+            outline: none;
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+        }
+
+        .schedule-title-section {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .completion-rate {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 15px 20px;
+            border: 1px solid rgba(30, 60, 114, 0.1);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.1);
+        }
+
+        .completion-circle {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(#4ECDC4 0deg, #4ECDC4 calc(var(--completion) * 3.6deg), #e0e0e0 calc(var(--completion) * 3.6deg), #e0e0e0 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .completion-circle::before {
+            content: '';
+            position: absolute;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .completion-percentage {
+            position: relative;
+            z-index: 1;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e3c72;
+        }
+
+        .completion-label {
+            position: relative;
+            z-index: 1;
+            font-size: 10px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .completion-stats {
+            font-size: 14px;
+            color: #1e3c72;
+            font-weight: 500;
+        }
+
+        .month-selector-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(30, 60, 114, 0.1);
+        }
+
+        .month-selector-container label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e3c72;
+            margin: 0;
+        }
+
+        .month-selector-container input[type="month"] {
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #1e3c72;
+            font-weight: 500;
+            padding: 5px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
+        }
+
+        .month-selector-container input[type="month"]:focus {
+            outline: none;
+            background: rgba(30, 60, 114, 0.05);
+        }
+
+        .empty-schedule {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(30, 60, 114, 0.1);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.1);
+        }
+
+        .empty-schedule i {
+            font-size: 48px;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .empty-schedule p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .schedule-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 
+                0 8px 32px rgba(30, 60, 114, 0.1),
+                0 2px 8px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .schedule-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298, #4a90e2);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .schedule-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 12px 40px rgba(30, 60, 114, 0.15),
+                0 4px 12px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .schedule-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .schedule-priority {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .schedule-priority.high {
+            background: linear-gradient(135deg, #dc3545, #ff6b6b);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .schedule-priority.medium {
+            background: linear-gradient(135deg, #ffc107, #ffb74d);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .schedule-priority.low {
+            background: linear-gradient(135deg, #28a745, #4ECDC4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .schedule-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .schedule-status.scheduled {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+        }
+
+        .schedule-status.in-progress {
+            background: linear-gradient(135deg, #ffc107, #ffb74d);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+        }
+
+        .schedule-status.completed {
+            background: linear-gradient(135deg, #28a745, #4ECDC4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .schedule-status.pending {
+            background: linear-gradient(135deg, #6c757d, #95a5a6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .schedule-card-body h4 {
+            color: #1e3c72;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .schedule-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .schedule-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .schedule-detail {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #5a6c7d;
+            font-size: 0.9rem;
+        }
+
+        .schedule-detail i {
+            color: #1e3c72;
+            width: 16px;
+        }
+
+        .schedule-card-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 8px;
+        }
+
+        /* Responsividade para o cronograma */
+        @media (max-width: 768px) {
+            .schedule-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .schedule-actions,
+            .schedule-filters {
+                justify-content: center;
+            }
+
+            .schedule-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .schedule-details {
+                grid-template-columns: 1fr;
+            }
+
+            .schedule-card-actions {
+                justify-content: center;
+            }
+        }
+
+        /* Estilos para gráficos - OTIMIZADOS */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .chart-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 
+                0 8px 32px rgba(30, 60, 114, 0.1),
+                0 2px 8px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298, #4a90e2);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .chart-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+            box-shadow: 
+                0 12px 40px rgba(30, 60, 114, 0.15),
+                0 4px 12px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
         }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-            box-shadow: none !important;
+
+        .chart-title {
+            color: #1e3c72;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 10px;
         }
-        
-        .btn:disabled:hover {
-            transform: none !important;
-            box-shadow: none !important;
+
+        .chart-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            border-radius: 1px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .filters-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 
+                0 8px 32px rgba(30, 60, 114, 0.1),
+                0 2px 8px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filters-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298, #4a90e2);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .filters-container h3 {
+            color: #1e3c72;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            align-items: end;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #1e3c72;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select {
+            padding: 12px 16px;
+            border: 2px solid rgba(30, 60, 114, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+            background: white;
+        }
+
+        .filter-btn {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 120px;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(30, 60, 114, 0.4);
+            background: linear-gradient(135deg, #2a5298, #4a90e2);
+        }
+
+        .filter-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(30, 60, 114, 0.3);
+        }
+
+        .filter-group input[type="date"] {
+            padding: 12px 16px;
+            border: 2px solid rgba(30, 60, 114, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            color: #1e3c72;
+        }
+
+        .filter-group input[type="date"]:focus {
+            outline: none;
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+            background: white;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .filter-btn.primary {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+        }
+
+        .filter-btn.secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .filter-btn.secondary:hover {
+            background: linear-gradient(135deg, #495057, #343a40);
+        }
+
+        .filter-results {
+            margin-top: 15px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(30, 60, 114, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(30, 60, 114, 0.1);
+        }
+
+        .results-text {
+            color: #1e3c72;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 30px 25px;
+            text-align: center;
+            box-shadow: 
+                0 8px 32px rgba(30, 60, 114, 0.1),
+                0 2px 8px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298, #4a90e2);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 12px 40px rgba(30, 60, 114, 0.15),
+                0 4px 12px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: #5a6c7d;
+            font-size: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Audit List Styles */
+        .audit-list {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 
+                0 8px 32px rgba(30, 60, 114, 0.1),
+                0 2px 8px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .audit-list::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298, #4a90e2);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .audit-list h3 {
+            color: #1e3c72;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .audit-list h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            border-radius: 1px;
+        }
+
+        .audit-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(30, 60, 114, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .audit-card:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+        }
+
+        .audit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(30, 60, 114, 0.1);
+        }
+
+        .audit-header h4 {
+            color: #1e3c72;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .audit-date {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .audit-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .audit-details p {
+            margin: 0;
+            color: #5a6c7d;
+            font-size: 0.9rem;
+        }
+
+        .audit-details strong {
+            color: #1e3c72;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+            }
+
+            .stat-card {
+                padding: 25px 20px;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .audit-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+         /* Estilos para botões de tipo de entrada */
+         .entry-type-buttons {
+             display: flex;
+             gap: 10px;
+             margin-bottom: 10px;
+         }
+
+         .entry-type-btn {
+             flex: 1;
+             padding: 12px 16px;
+             border: 2px solid #1e3c72;
+             background: white;
+             color: #1e3c72;
+             border-radius: 8px;
+             cursor: pointer;
+             font-weight: 500;
+             transition: all 0.3s ease;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             gap: 8px;
+         }
+
+         .entry-type-btn:hover {
+             background: rgba(30, 60, 114, 0.1);
+         }
+
+         .entry-type-btn.active {
+             background: #1e3c72;
+             color: white;
+         }
+
+         .entry-type-description {
+             color: #666;
+             font-size: 0.9rem;
+             margin-top: 5px;
+         }
+
+                 .form-text {
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        /* Estilos específicos para checkbox */
+        .checkbox-group {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(30, 60, 114, 0.1);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-group:hover {
+            border-color: rgba(30, 60, 114, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.1);
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0;
+            cursor: pointer;
+            font-weight: 500;
+            color: #1e3c72;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            transform: scale(1.2);
+            accent-color: #1e3c72;
+        }
+
+        .checkbox-group .form-text {
+            margin-top: 8px;
+            margin-left: 28px;
+            color: #5a6c7d;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
 
         /* Modal */
@@ -359,208 +1295,149 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             align-items: center;
             justify-content: center;
-            animation: modalFadeIn 0.3s ease-out;
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
         }
 
         .modal-content {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
             backdrop-filter: blur(25px);
-            border-radius: 24px;
-            padding: 0;
+            border-radius: 25px;
+            padding: 35px;
             max-width: 500px;
             width: 90%;
-            box-shadow: 0 25px 80px rgba(30, 60, 114, 0.25);
+            box-shadow: 
+                0 25px 80px rgba(30, 60, 114, 0.25),
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.4);
+            position: relative;
             overflow: hidden;
-            animation: modalSlideIn 0.4s ease-out;
+            animation: modalContentSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298, #4ECDC4);
+            border-radius: 25px 25px 0 0;
+        }
+
+        @keyframes modalContentSlideIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0;
-            padding: 30px 30px 20px;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(30, 60, 114, 0.1);
             position: relative;
         }
 
         .modal-header::after {
             content: '';
             position: absolute;
-            bottom: 0;
+            bottom: -2px;
             left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            border-radius: 1px;
         }
 
         .modal-header h3 {
-            color: white;
+            color: #1e3c72;
             font-size: 1.6rem;
-            font-weight: 600;
+            font-weight: 700;
             margin: 0;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .modal-close {
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            border: 1px solid rgba(30, 60, 114, 0.1);
             font-size: 20px;
-            color: white;
+            color: #1e3c72;
             cursor: pointer;
-            padding: 8px;
+            padding: 12px;
             border-radius: 50%;
-            transition: all 0.3s ease;
-            width: 40px;
-            height: 40px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+            width: 45px;
+            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .modal-close:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.1);
-        }
-
-        /* Remove Modal Specific Styles */
-        .remove-modal .modal-content {
-            max-width: 450px;
-        }
-
-        .remove-modal .modal-header {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        }
-
-        .remove-modal .modal-body {
-            padding: 30px;
-            text-align: center;
-        }
-
-        .remove-icon {
-            font-size: 4rem;
-            color: #dc3545;
-            margin-bottom: 20px;
-            opacity: 0.8;
-        }
-
-        .remove-message {
-            font-size: 1.1rem;
-            color: #495057;
-            margin-bottom: 25px;
-            line-height: 1.6;
-        }
-
-        .remove-details {
-            background: rgba(220, 53, 69, 0.1);
-            border: 1px solid rgba(220, 53, 69, 0.2);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-
-        .remove-details h4 {
-            color: #dc3545;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .remove-details p {
-            color: #6c757d;
-            margin: 5px 0;
-            font-size: 0.95rem;
-        }
-
-        .remove-actions {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        .remove-actions .btn {
-            min-width: 120px;
-            padding: 12px 24px;
-            font-weight: 600;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .remove-actions .btn-danger {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            border: none;
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-        }
-
-        .remove-actions .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
-        }
-
-        .remove-actions .btn-secondary {
-            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-            border: none;
-            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
-        }
-
-        .remove-actions .btn-secondary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
-        }
-
-        .modal-body {
-            padding: 30px;
+            background: linear-gradient(145deg, #1e3c72, #2a5298);
+            color: white;
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.3);
         }
 
         .form-group {
             margin-bottom: 20px;
+            position: relative;
+            animation: formGroupSlideIn 0.6s ease-out;
+        }
+
+        .form-group::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            transition: width 0.3s ease;
+        }
+
+        .form-group:focus-within::after {
+            width: 100%;
+        }
+
+        @keyframes formGroupSlideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
             color: #1e3c72;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 12px 15px;
+            padding: 12px 16px;
             border: 2px solid rgba(30, 60, 114, 0.1);
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
 
         .form-group input:focus,
@@ -568,68 +1445,341 @@
         .form-group textarea:focus {
             outline: none;
             border-color: #1e3c72;
-            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: rgba(30, 60, 114, 0.3);
+            background: rgba(255, 255, 255, 0.9);
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 20px;
+        }
+
+        /* Modal animations and enhancements */
+        .modal.show {
+            animation: modalShow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal.show .modal-content {
+            animation: modalContentSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalShow {
+            from {
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            to {
+                opacity: 1;
+                backdrop-filter: blur(15px);
+            }
+        }
+
+        /* Enhanced form group animations */
+        .form-group {
+            animation: formGroupSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation-fill-mode: both;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .form-group:nth-child(5) { animation-delay: 0.5s; }
+        .form-group:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes formGroupSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Enhanced select styling */
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%231e3c72' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        /* Enhanced textarea styling */
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        /* Modal responsive design */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                padding: 25px;
+                margin: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .form-actions::before {
+                display: none;
+            }
+
+            .modal-header h3 {
+                font-size: 1.4rem;
+            }
+
+            .modal-close {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
         }
 
         .form-actions {
             display: flex;
             gap: 15px;
             justify-content: flex-end;
-            margin-top: 25px;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(30, 60, 114, 0.1);
+            position: relative;
         }
 
-        /* Filter Section */
-        .filter-section {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
-            border: 1px solid rgba(30, 60, 114, 0.1);
+        .form-actions::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, #1e3c72, #2a5298);
+            border-radius: 1px;
         }
 
-        .filter-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 10px 20px;
-            border: 2px solid rgba(30, 60, 114, 0.2);
+        /* Estilos específicos para o modal de remoção */
+        .remove-modal-content {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            backdrop-filter: blur(25px);
             border-radius: 25px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #5a6c7d;
-            font-size: 14px;
-            font-weight: 500;
+            padding: 35px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 
+                0 25px 80px rgba(30, 60, 114, 0.25),
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+            animation: modalContentSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .remove-modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #dc3545, #ff6b6b, #ee5a52);
+            border-radius: 25px 25px 0 0;
+        }
+
+        @keyframes modalContentSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .remove-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(220, 53, 69, 0.1);
+            position: relative;
+        }
+
+        .remove-modal-header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #dc3545, #ff6b6b);
+            border-radius: 1px;
+        }
+
+        .remove-modal-header h3 {
+            color: #dc3545;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, #dc3545, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .remove-modal-close {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            border: 1px solid rgba(220, 53, 69, 0.1);
+            font-size: 20px;
+            color: #dc3545;
             cursor: pointer;
-            transition: all 0.3s ease;
+            padding: 12px;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.1);
+            width: 45px;
+            height: 45px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
         }
 
-        .filter-btn:hover {
-            border-color: #1e3c72;
-            background: rgba(30, 60, 114, 0.1);
-            color: #1e3c72;
-        }
-
-        .filter-btn.active {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
+        .remove-modal-close:hover {
+            background: linear-gradient(145deg, #dc3545, #ff6b6b);
             color: white;
-            border-color: #1e3c72;
-            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
         }
 
-        .filter-btn i {
-            font-size: 16px;
+        .remove-modal-body {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .remove-icon {
+            font-size: 4rem;
+            color: #dc3545;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .remove-message {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .remove-details {
+            font-size: 0.95rem;
+            color: #666;
+            margin: 0;
+            font-style: italic;
+        }
+
+        .remove-form-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(220, 53, 69, 0.1);
+            position: relative;
+        }
+
+        .remove-form-actions::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6b6b, #dc3545);
+            border-radius: 1px;
+        }
+
+        .remove-btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            box-shadow: 
+                0 6px 20px rgba(149, 165, 166, 0.3),
+                0 2px 8px rgba(127, 140, 141, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .remove-btn-secondary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 12px 35px rgba(149, 165, 166, 0.4),
+                0 4px 15px rgba(127, 140, 141, 0.3);
+            background: linear-gradient(135deg, #7f8c8d, #95a5a6);
+        }
+
+        .remove-btn-danger {
+            background: linear-gradient(135deg, #dc3545, #ff6b6b);
+            box-shadow: 
+                0 6px 20px rgba(220, 53, 69, 0.3),
+                0 2px 8px rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .remove-btn-danger:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 12px 35px rgba(220, 53, 69, 0.4),
+                0 4px 15px rgba(255, 107, 107, 0.3);
+            background: linear-gradient(135deg, #ff6b6b, #dc3545);
         }
 
         /* Mobile Menu */
@@ -662,175 +1812,54 @@
                 display: block;
             }
 
-            .sidebar-close-btn {
-                display: block;
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                background: none;
-                border: none;
-                font-size: 24px;
-                color: #1e3c72;
-                cursor: pointer;
-                padding: 10px;
-                border-radius: 10px;
-                z-index: 1001;
-            }
-
-                    .sidebar-close-btn:hover {
-            background: rgba(30, 60, 114, 0.1);
-        }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .sidebar-overlay.active {
-            display: block;
-        }
-
             .main-content {
-                padding: 15px;
-            }
-
-            .header {
                 padding: 20px;
-                margin-bottom: 20px;
-            }
-
-            .header h1 {
-                font-size: 1.5rem;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .stat-card {
-                padding: 20px;
-            }
-
-            .stat-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-
-            .stat-number {
-                font-size: 1.5rem;
-            }
-
-            .warehouse-layout {
-                padding: 20px;
             }
 
             .gondolas {
-                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-                gap: 8px;
-            }
-
-            .gondola {
-                padding: 10px;
-            }
-
-            .gondola-label {
-                font-size: 12px;
-            }
-
-            .shelf {
-                height: 30px;
-                font-size: 10px;
-            }
-
-            .filter-buttons {
-                gap: 8px;
-            }
-
-            .filter-btn {
-                padding: 8px 16px;
-                font-size: 12px;
-            }
-
-            .filter-btn i {
-                font-size: 14px;
-            }
-
-            .btn {
-                padding: 10px 16px;
-                font-size: 12px;
-            }
-
-            .modal-content {
-                padding: 20px;
-                margin: 20px;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .main-content {
-                padding: 10px;
-            }
-
-            .header {
-                padding: 15px;
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
                 gap: 10px;
             }
 
-            .stat-card {
-                padding: 15px;
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .gondolas {
-                grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-                gap: 5px;
-            }
-
             .shelf {
-                height: 25px;
-                font-size: 9px;
+                height: 35px;
+                font-size: 11px;
+            }
+
+            .charts-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .filter-group {
+                min-width: auto;
             }
 
             .filter-buttons {
-                justify-content: center;
+                flex-direction: column;
+                gap: 10px;
             }
 
             .filter-btn {
-                padding: 6px 12px;
-                font-size: 11px;
+                width: 100%;
+                min-width: auto;
             }
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar Overlay -->
-        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
-        
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
-            <button class="sidebar-close-btn" onclick="toggleSidebar()">
-                <i class="fas fa-times"></i>
-            </button>
             <div class="sidebar-header">
                 <i class="fas fa-warehouse"></i>
                 <h2>WMS</h2>
@@ -855,6 +1884,18 @@
                 <li><a href="#" data-section="reports">
                     <i class="fas fa-chart-bar"></i>
                     <span>Relatórios</span>
+                </a></li>
+                <li><a href="#" data-section="audit-entry">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Nova Auditoria</span>
+                </a></li>
+                <li><a href="#" data-section="audit-dashboard">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Dashboard Auditoria</span>
+                </a></li>
+                <li><a href="#" data-section="audit-schedule">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Cronograma de Auditorias</span>
                 </a></li>
             </ul>
         </nav>
@@ -925,9 +1966,9 @@
             <!-- Warehouse Section -->
             <div class="content-section" id="warehouse">
                 <div class="warehouse-layout">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h2>Layout do Armazém</h2>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 10px;">
                             <button class="btn btn-primary" onclick="showModal('add')">
                                 <i class="fas fa-plus"></i> Adicionar
                             </button>
@@ -939,23 +1980,6 @@
                             </button>
                         </div>
                     </div>
-                    
-                    <!-- Filtros -->
-                    <div class="filter-section">
-                        <h3 style="margin-bottom: 15px; color: #1e3c72;">Filtros</h3>
-                        <div class="filter-buttons">
-                            <button class="filter-btn active" data-filter="all" onclick="filterShelves('all')">
-                                <i class="fas fa-th"></i> Todas
-                            </button>
-                            <button class="filter-btn" data-filter="available" onclick="filterShelves('available')">
-                                <i class="fas fa-check-circle"></i> Disponíveis
-                            </button>
-                            <button class="filter-btn" data-filter="occupied" onclick="filterShelves('occupied')">
-                                <i class="fas fa-times-circle"></i> Ocupadas
-                            </button>
-                        </div>
-                    </div>
-                    
                     <div id="warehouse-layout">
                         <!-- Layout será gerado aqui -->
                     </div>
@@ -1010,8 +2034,101 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Audit Entry Section -->
+            <div class="content-section" id="audit-entry">
+                <div class="warehouse-layout">
+                    <h2>Nova Auditoria</h2>
+                                         <form id="audit-form-page">
+                         <div class="form-row">
+                             <div class="form-group">
+                                 <label for="audit-date-page">Data da Auditoria</label>
+                                 <input type="date" id="audit-date-page" required>
+                             </div>
+                             <div class="form-group">
+                                 <label for="auditor-name-page">Auditor Responsável</label>
+                                 <input type="text" id="auditor-name-page" placeholder="Nome do auditor" required>
+                             </div>
+                         </div>
+                         
+                         <div class="form-row">
+                             <div class="form-group">
+                                 <label for="audit-location-page">Local da Auditoria</label>
+                                 <input type="text" id="audit-location-page" placeholder="Setor/Área" required>
+                             </div>
+                         </div>
+                         
+                         <div class="form-group">
+                             <label>Tipo de Entrada</label>
+                             <div class="entry-type-buttons">
+                                 <button type="button" class="entry-type-btn" data-type="rua" onclick="selectEntryType('rua')">
+                                     <i class="fas fa-map-marker-alt"></i>
+                                     Rua
+                                 </button>
+                                 <button type="button" class="entry-type-btn" data-type="classe" onclick="selectEntryType('classe')">
+                                     <i class="fas fa-building"></i>
+                                     Classe
+                                 </button>
+                                 <button type="button" class="entry-type-btn active" data-type="produto" onclick="selectEntryType('produto')">
+                                     <i class="fas fa-box"></i>
+                                     Produto
+                                 </button>
+                             </div>
+                             <div class="entry-type-description" id="entry-type-description">
+                                 Auditoria de um produto único
+                             </div>
+                         </div>
+                         
+                         <div class="checkbox-group">
+                             <label>
+                                 <input type="checkbox" id="uses-batches-page" checked onchange="toggleBatchFields()">
+                                 Este setor/área utiliza lotes
+                             </label>
+                             <small class="form-text">Campos de lotes serão exibidos (lotes não encontrados, não cadastrados, etc.)</small>
+                         </div>
+                         
+                         <div class="form-group">
+                             <label id="add-item-label">Adicionar Produto</label>
+                             <div id="audit-items-page">
+                                 <!-- Itens serão adicionados aqui -->
+                             </div>
+                             <button type="button" class="btn btn-secondary" onclick="addAuditItemPage()" id="add-item-btn">
+                                 <i class="fas fa-plus"></i> Adicionar Produto
+                             </button>
+                         </div>
+                         
+                         <div class="form-actions">
+                             <button type="button" class="btn btn-primary" onclick="saveAuditPage()">
+                                 <i class="fas fa-save"></i> Salvar Auditoria Completa
+                             </button>
+                         </div>
+                     </form>
+                </div>
+            </div>
+
+            <!-- Audit Dashboard Section -->
+            <div class="content-section" id="audit-dashboard">
+                <div class="warehouse-layout">
+                    <h2>Dashboard de Auditoria</h2>
+                    <div id="audit-dashboard-content-page">
+                        <!-- Conteúdo do dashboard será carregado aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audit Schedule Section -->
+            <div class="content-section" id="audit-schedule">
+                <div class="warehouse-layout">
+                    <h2>Cronograma de Auditorias</h2>
+                    <div id="audit-schedule-content">
+                        <!-- Conteúdo do cronograma será carregado aqui -->
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
+
+
 
     <!-- Modal -->
     <div class="modal" id="modal">
@@ -1022,85 +2139,71 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-body">
-                <form id="product-form">
+            <form id="product-form">
+                <div class="form-group">
+                    <label for="product-name">Nome do Produto</label>
+                    <input type="text" id="product-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="product-sku">SKU</label>
+                    <input type="text" id="product-sku" required>
+                </div>
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="product-name">Nome do Produto</label>
-                        <input type="text" id="product-name" required>
+                        <label for="product-quantity">Quantidade</label>
+                        <input type="number" id="product-quantity" value="1" min="1" required>
                     </div>
                     <div class="form-group">
-                        <label for="product-sku">SKU</label>
-                        <input type="text" id="product-sku" required>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="product-quantity">Quantidade</label>
-                            <input type="number" id="product-quantity" value="1" min="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="product-unit">Unidade</label>
-                            <select id="product-unit">
-                                <option value="un">Unidade</option>
-                                <option value="kg">Quilograma</option>
-                                <option value="l">Litro</option>
-                                <option value="m">Metro</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-category">Categoria</label>
-                        <select id="product-category">
-                            <option value="Eletrônicos">Eletrônicos</option>
-                            <option value="Vestuário">Vestuário</option>
-                            <option value="Alimentos">Alimentos</option>
-                            <option value="Livros">Livros</option>
-                            <option value="Outros">Outros</option>
+                        <label for="product-unit">Unidade</label>
+                        <select id="product-unit">
+                            <option value="un">Unidade</option>
+                            <option value="kg">Quilograma</option>
+                            <option value="l">Litro</option>
+                            <option value="m">Metro</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="product-description">Descrição</label>
-                        <textarea id="product-description" rows="3"></textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Salvar</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="form-group">
+                    <label for="product-category">Categoria</label>
+                    <select id="product-category">
+                        <option value="Eletrônicos">Eletrônicos</option>
+                        <option value="Vestuário">Vestuário</option>
+                        <option value="Alimentos">Alimentos</option>
+                        <option value="Livros">Livros</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Descrição</label>
+                    <textarea id="product-description" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Remove Modal -->
-    <div class="modal remove-modal" id="remove-modal">
-        <div class="modal-content">
-            <div class="modal-header">
+    <!-- Modal de Remoção -->
+    <div class="modal" id="remove-modal">
+        <div class="modal-content remove-modal-content">
+            <div class="modal-header remove-modal-header">
                 <h3>Remover Produto</h3>
-                <button class="modal-close" onclick="closeRemoveModal()">
+                <button class="modal-close remove-modal-close" onclick="closeRemoveModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="remove-modal-body">
                 <div class="remove-icon">
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
-                <div class="remove-message">
-                    Tem certeza que deseja remover o produto desta prateleira?
-                </div>
-                <div class="remove-details" id="remove-details">
-                    <h4>Detalhes do Produto</h4>
-                    <p><strong>Nome:</strong> <span id="remove-product-name"></span></p>
-                    <p><strong>SKU:</strong> <span id="remove-product-sku"></span></p>
-                    <p><strong>Quantidade:</strong> <span id="remove-product-quantity"></span></p>
-                    <p><strong>Posição:</strong> <span id="remove-product-position"></span></p>
-                </div>
-                <div class="remove-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeRemoveModal()">
-                        <i class="fas fa-times"></i> Cancelar
-                    </button>
-                    <button type="button" class="btn btn-danger" onclick="confirmRemoveProduct()">
-                        <i class="fas fa-trash"></i> Remover
-                    </button>
-                </div>
+                <p class="remove-message">Tem certeza que deseja remover o produto desta prateleira?</p>
+                <p class="remove-details">Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="form-actions remove-form-actions">
+                <button type="button" class="btn btn-secondary remove-btn-secondary" onclick="closeRemoveModal()">Cancelar</button>
+                <button type="button" class="btn btn-danger remove-btn-danger" onclick="confirmRemoveProduct()">Remover</button>
             </div>
         </div>
     </div>
@@ -1130,7 +2233,6 @@
             setupNavigation();
             setupEventListeners();
             loadDashboard();
-            updateButtonStates(); // Inicializar estado dos botões
         });
 
         // Inicializar dados do armazém
@@ -1142,9 +2244,6 @@
                 warehouseData.shelves = new Map(parsed.shelves);
                 warehouseData.products = new Map(parsed.products);
                 warehouseData.transactions = parsed.transactions;
-                
-                // Corrigir inconsistências de dados
-                fixDataInconsistencies();
             } else {
                 warehouseData.aisles.forEach(aisle => {
                     for (let gondola = 1; gondola <= aisle.gondolas; gondola++) {
@@ -1180,43 +2279,6 @@
                     }
                 });
                 saveData();
-            }
-        }
-
-        // Corrigir inconsistências de dados
-        function fixDataInconsistencies() {
-            let fixedCount = 0;
-            
-            // Verificar todas as prateleiras
-            for (const [position, shelf] of warehouseData.shelves) {
-                // Se a prateleira está marcada como ocupada mas não tem produto
-                if (shelf.status === 'occupied' && (!shelf.productId || !warehouseData.products.has(shelf.productId))) {
-                    // Corrigir para disponível (vermelho)
-                    warehouseData.shelves.set(position, {
-                        ...shelf,
-                        status: 'available',
-                        productId: null,
-                        lastUpdated: new Date().toISOString()
-                    });
-                    fixedCount++;
-                }
-                
-                // Se a prateleira está marcada como disponível mas tem produto
-                if (shelf.status === 'available' && shelf.productId && warehouseData.products.has(shelf.productId)) {
-                    // Corrigir para ocupada (verde)
-                    warehouseData.shelves.set(position, {
-                        ...shelf,
-                        status: 'occupied',
-                        lastUpdated: new Date().toISOString()
-                    });
-                    fixedCount++;
-                }
-            }
-            
-            // Se foram feitas correções, salvar os dados
-            if (fixedCount > 0) {
-                saveData();
-                console.log(`Corrigidas ${fixedCount} inconsistências de dados no armazém.`);
             }
         }
 
@@ -1268,6 +2330,15 @@
                     break;
                 case 'transactions':
                     loadTransactions();
+                    break;
+                case 'audit-entry':
+                    loadAuditEntry();
+                    break;
+                case 'audit-dashboard':
+                    loadAuditDashboardPage();
+                    break;
+                case 'audit-schedule':
+                    loadAuditSchedule();
                     break;
             }
         }
@@ -1323,8 +2394,7 @@
                                             return `
                                                 <div class="shelf ${shelf?.status || 'available'}" 
                                                      data-position="${position}"
-                                                     onclick="selectShelf(this, '${position}')"
-                                                     title="${shelf?.status === 'occupied' ? 'Clique para selecionar - Produto pode ser removido' : 'Clique para selecionar - Prateleira vazia'}">
+                                                     onclick="selectShelf(this, '${position}')">
                                                     ${product ? `
                                                         <div class="shelf-info">
                                                             <small>${product.name}</small>
@@ -1341,12 +2411,6 @@
                     </div>
                 </div>
             `).join('');
-            
-            // Aplicar filtro atual após carregar
-            setTimeout(() => {
-                filterShelves(currentFilter);
-                updateButtonStates(); // Atualizar estado dos botões após carregar
-            }, 100);
         }
 
         // Carregar produtos
@@ -1392,42 +2456,6 @@
             document.querySelectorAll('.shelf.selected').forEach(s => s.classList.remove('selected'));
             element.classList.add('selected');
             selectedShelf = { element, position };
-            
-            // Atualizar estado dos botões baseado na prateleira selecionada
-            updateButtonStates();
-        }
-        
-        // Atualizar estado dos botões
-        function updateButtonStates() {
-            const addBtn = document.querySelector('button[onclick="showModal(\'add\')"]');
-            const removeBtn = document.querySelector('button[onclick="showModal(\'remove\')"]');
-            const editBtn = document.querySelector('button[onclick="showModal(\'edit\')"]');
-            
-            if (!selectedShelf) {
-                // Nenhuma prateleira selecionada
-                addBtn.disabled = true;
-                removeBtn.disabled = true;
-                editBtn.disabled = true;
-                addBtn.title = 'Selecione uma prateleira primeiro';
-                removeBtn.title = 'Selecione uma prateleira primeiro';
-                editBtn.title = 'Selecione uma prateleira primeiro';
-                return;
-            }
-            
-            const shelf = warehouseData.shelves.get(selectedShelf.position);
-            const isOccupied = shelf && shelf.status === 'occupied' && shelf.productId;
-            
-            // Botão Adicionar - só funciona em prateleiras vazias
-            addBtn.disabled = isOccupied;
-            addBtn.title = isOccupied ? 'Esta prateleira já está ocupada' : 'Adicionar produto à prateleira';
-            
-            // Botão Remover - só funciona em prateleiras ocupadas
-            removeBtn.disabled = !isOccupied;
-            removeBtn.title = isOccupied ? 'Remover produto da prateleira' : 'Esta prateleira está vazia';
-            
-            // Botão Editar - só funciona em prateleiras ocupadas
-            editBtn.disabled = !isOccupied;
-            editBtn.title = isOccupied ? 'Editar produto da prateleira' : 'Esta prateleira está vazia';
         }
 
         // Mostrar modal
@@ -1446,7 +2474,6 @@
             if (type === 'add') {
                 title.textContent = 'Adicionar Produto';
                 form.reset();
-                modal.style.display = 'flex';
             } else if (type === 'remove') {
                 showRemoveModal();
                 return;
@@ -1464,51 +2491,38 @@
                         document.getElementById('product-description').value = product.description || '';
                     }
                 }
-                modal.style.display = 'flex';
             }
+
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+        }
+
+        // Fechar modal
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            modalType = null;
         }
 
         // Mostrar modal de remoção
         function showRemoveModal() {
-            const shelf = warehouseData.shelves.get(selectedShelf.position);
-            
-            // Verificar se a prateleira está vazia
-            if (!shelf || shelf.status === 'available' || !shelf.productId) {
-                alert('Esta prateleira está vazia e não pode ser removida!');
-                return;
-            }
-            
-            const product = warehouseData.products.get(shelf.productId);
-            if (product) {
-                document.getElementById('remove-product-name').textContent = product.name;
-                document.getElementById('remove-product-sku').textContent = product.sku;
-                document.getElementById('remove-product-quantity').textContent = `${product.quantity} ${product.unit}`;
-                document.getElementById('remove-product-position').textContent = selectedShelf.position;
-                
-                const removeModal = document.getElementById('remove-modal');
-                removeModal.style.display = 'flex';
-            } else {
-                alert('Produto não encontrado nesta prateleira!');
-            }
+            const modal = document.getElementById('remove-modal');
+            modal.style.display = 'flex';
         }
 
         // Fechar modal de remoção
         function closeRemoveModal() {
-            const removeModal = document.getElementById('remove-modal');
-            removeModal.style.display = 'none';
+            const modal = document.getElementById('remove-modal');
+            modal.style.display = 'none';
         }
 
         // Confirmar remoção do produto
         function confirmRemoveProduct() {
             removeProductFromShelf();
             closeRemoveModal();
-        }
-
-        // Fechar modal
-        function closeModal() {
-            const modal = document.getElementById('modal');
-            modal.style.display = 'none';
-            modalType = null;
         }
 
         // Configurar event listeners
@@ -1533,6 +2547,33 @@
 
                 closeModal();
             });
+
+            // Close main modal when clicking outside
+            document.getElementById('modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+
+            // Close remove modal when clicking outside
+            document.getElementById('remove-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeRemoveModal();
+                }
+            });
+
+            // Close modals with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (document.getElementById('modal').style.display === 'flex') {
+                        closeModal();
+                    }
+                    if (document.getElementById('remove-modal').style.display === 'flex') {
+                        closeRemoveModal();
+                    }
+                }
+            });
+
         }
 
         // Adicionar produto
@@ -1590,17 +2631,12 @@
             const position = selectedShelf.position;
             const shelf = warehouseData.shelves.get(position);
 
-            // Verificar se a prateleira está vazia
-            if (!shelf || shelf.status === 'available' || !shelf.productId) {
-                alert('Esta prateleira está vazia e não pode ser removida!');
+            if (shelf.status === 'available') {
+                alert('Esta prateleira já está vazia!');
                 return;
             }
 
             const product = warehouseData.products.get(shelf.productId);
-            if (!product) {
-                alert('Produto não encontrado nesta prateleira!');
-                return;
-            }
 
             warehouseData.products.delete(shelf.productId);
             warehouseData.shelves.set(position, {
@@ -1696,87 +2732,1320 @@
             return new Date(timestamp).toLocaleString('pt-BR');
         }
 
-        // Filtros
-        let currentFilter = 'all';
-
-        function filterShelves(filter) {
-            currentFilter = filter;
-            
-            // Atualizar botões de filtro
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
-            
-            // Aplicar filtro nas prateleiras
-            const shelves = document.querySelectorAll('.shelf');
-            shelves.forEach(shelf => {
-                const isAvailable = shelf.classList.contains('available');
-                const isOccupied = shelf.classList.contains('occupied');
-                
-                switch(filter) {
-                    case 'available':
-                        shelf.style.display = isAvailable ? 'flex' : 'none';
-                        break;
-                    case 'occupied':
-                        shelf.style.display = isOccupied ? 'flex' : 'none';
-                        break;
-                    case 'all':
-                    default:
-                        shelf.style.display = 'flex';
-                        break;
-                }
-            });
-            
-            // Atualizar estatísticas do filtro
-            updateFilterStats(filter);
-        }
-
-        function updateFilterStats(filter) {
-            const totalShelves = warehouseData.shelves.size;
-            const availableShelves = Array.from(warehouseData.shelves.values()).filter(s => s.status === 'available').length;
-            const occupiedShelves = Array.from(warehouseData.shelves.values()).filter(s => s.status === 'occupied').length;
-            
-            let filteredCount = 0;
-            switch(filter) {
-                case 'available':
-                    filteredCount = availableShelves;
-                    break;
-                case 'occupied':
-                    filteredCount = occupiedShelves;
-                    break;
-                case 'all':
-                default:
-                    filteredCount = totalShelves;
-                    break;
-            }
-            
-            // Adicionar contador visual se necessário
-            const filterSection = document.querySelector('.filter-section');
-            let counter = filterSection.querySelector('.filter-counter');
-            if (!counter) {
-                counter = document.createElement('div');
-                counter.className = 'filter-counter';
-                counter.style.cssText = 'margin-top: 10px; text-align: center; color: #1e3c72; font-weight: 600;';
-                filterSection.appendChild(counter);
-            }
-            
-            const filterNames = {
-                'all': 'Todas',
-                'available': 'Disponíveis',
-                'occupied': 'Ocupadas'
-            };
-            
-            counter.textContent = `${filterNames[filter]}: ${filteredCount} prateleiras`;
-        }
-
         // Mobile menu
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
             sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
         }
+
+
+
+        // ===== FUNÇÕES PARA PÁGINAS DE AUDITORIA =====
+        
+                 // Carregar página de entrada de auditoria
+         function loadAuditEntry() {
+             // Limpar formulário
+             document.getElementById('audit-form-page').reset();
+             document.getElementById('audit-items-page').innerHTML = '';
+             
+             // Definir data atual
+             const today = new Date().toISOString().split('T')[0];
+             document.getElementById('audit-date-page').value = today;
+             
+             // Adicionar primeiro item por padrão
+             addAuditItemPage();
+         }
+
+         // Selecionar tipo de entrada
+         function selectEntryType(type) {
+             // Remover classe active de todos os botões
+             document.querySelectorAll('.entry-type-btn').forEach(btn => {
+                 btn.classList.remove('active');
+             });
+             
+             // Adicionar classe active ao botão selecionado
+             document.querySelector(`[data-type="${type}"]`).classList.add('active');
+             
+             // Atualizar descrição
+             const descriptions = {
+                 'rua': 'Auditoria por rua com diversas classes',
+                 'classe': 'Auditoria de uma classe inteira com vários produtos',
+                 'produto': 'Auditoria de um produto único'
+             };
+             document.getElementById('entry-type-description').textContent = descriptions[type];
+             
+             // Atualizar labels
+             const labels = {
+                 'rua': 'Adicionar Rua',
+                 'classe': 'Adicionar Classe',
+                 'produto': 'Adicionar Produto'
+             };
+             document.getElementById('add-item-label').textContent = labels[type];
+             document.getElementById('add-item-btn').innerHTML = `<i class="fas fa-plus"></i> ${labels[type]}`;
+             
+             // Limpar itens existentes e adicionar novo
+             document.getElementById('audit-items-page').innerHTML = '';
+             addAuditItemPage();
+         }
+
+         // Obter tipo de entrada atual
+         function getCurrentEntryType() {
+             const activeBtn = document.querySelector('.entry-type-btn.active');
+             return activeBtn ? activeBtn.dataset.type : 'produto';
+         }
+
+        
+
+                 // Adicionar item à auditoria (página)
+         function addAuditItemPage() {
+             const itemsContainer = document.getElementById('audit-items-page');
+             const itemId = 'item-' + Date.now();
+             const currentEntryType = getCurrentEntryType();
+             const usesBatches = document.getElementById('uses-batches-page').checked;
+             
+             let itemHTML = '';
+             
+             if (currentEntryType === 'produto') {
+                 itemHTML = `
+                     <div class="audit-item" data-id="${itemId}">
+                         <div class="form-row">
+                             <div class="form-group">
+                                 <label>Código do Produto</label>
+                                 <input type="text" class="product-code" placeholder="Código" required>
+                             </div>
+                             <div class="form-group">
+                                 <label>Nome do Produto</label>
+                                 <input type="text" class="product-name" placeholder="Nome do produto" required>
+                             </div>
+                         </div>
+                         <div class="form-row">
+                             <div class="form-group">
+                                 <label>Quantidade Esperada</label>
+                                 <input type="number" class="expected-quantity" value="0" required>
+                             </div>
+                             <div class="form-group">
+                                 <label>Quantidade Real</label>
+                                 <input type="number" class="actual-quantity" value="0" required>
+                             </div>
+                         </div>
+                         <div class="form-row" style="display: ${usesBatches ? 'flex' : 'none'};">
+                             <div class="form-group">
+                                 <label>Quantidade de Lotes Não Encontrados</label>
+                                 <input type="number" class="batches-not-found" value="0">
+                             </div>
+                             <div class="form-group">
+                                 <label>Quantidade de Caixas Não Cadastradas</label>
+                                 <input type="number" class="boxes-not-registered" value="0">
+                             </div>
+                         </div>
+                         <div class="form-row" style="display: ${usesBatches ? 'flex' : 'none'};">
+                             <div class="form-group">
+                                 <label>Quantidade de Caixas em Local Errado</label>
+                                 <input type="number" class="boxes-wrong-location" value="0">
+                             </div>
+                             <div class="form-group">
+                                 <label>Quantidade de Lotes Baixados</label>
+                                 <input type="number" class="batches-downloaded" value="0">
+                             </div>
+                         </div>
+                         <button type="button" class="btn btn-danger btn-sm" onclick="removeAuditItemPage(this)">
+                             <i class="fas fa-trash"></i> Remover Produto
+                         </button>
+                     </div>
+                 `;
+             } else if (currentEntryType === 'classe') {
+                 itemHTML = `
+                     <div class="audit-item" data-id="${itemId}">
+                         <div class="form-row">
+                             <div class="form-group">
+                                 <label>Código da Classe</label>
+                                 <input type="text" class="class-code" placeholder="Código da classe" required>
+                             </div>
+                             <div class="form-group">
+                                 <label>Descrição da Classe</label>
+                                 <input type="text" class="class-description" placeholder="Descrição da classe" required>
+                             </div>
+                         </div>
+                         <div class="form-row">
+                             <div class="form-group">
+                                 <label>Quantidade Esperada</label>
+                                 <input type="number" class="expected-quantity" value="0" required>
+                             </div>
+                             <div class="form-group">
+                                 <label>Quantidade Real</label>
+                                 <input type="number" class="actual-quantity" value="0" required>
+                             </div>
+                         </div>
+                         <div class="form-row" style="display: ${usesBatches ? 'flex' : 'none'};">
+                             <div class="form-group">
+                                 <label>Quantidade de Lotes Não Encontrados</label>
+                                 <input type="number" class="batches-not-found" value="0">
+                             </div>
+                             <div class="form-group">
+                                 <label>Quantidade de Caixas Não Cadastradas</label>
+                                 <input type="number" class="boxes-not-registered" value="0">
+                             </div>
+                         </div>
+                         <div class="form-row" style="display: ${usesBatches ? 'flex' : 'none'};">
+                             <div class="form-group">
+                                 <label>Quantidade de Caixas em Local Errado</label>
+                                 <input type="number" class="boxes-wrong-location" value="0">
+                             </div>
+                             <div class="form-group">
+                                 <label>Quantidade de Lotes Baixados</label>
+                                 <input type="number" class="batches-downloaded" value="0">
+                             </div>
+                         </div>
+                         <button type="button" class="btn btn-danger btn-sm" onclick="removeAuditItemPage(this)">
+                             <i class="fas fa-trash"></i> Remover Classe
+                         </button>
+                     </div>
+                 `;
+             } else if (currentEntryType === 'rua') {
+                 itemHTML = `
+                     <div class="audit-item" data-id="${itemId}">
+                         <div class="form-row">
+                             <div class="form-group">
+                                 <label>Nome da Rua</label>
+                                 <input type="text" class="street-name" placeholder="Nome da rua" required>
+                             </div>
+                             <div class="form-group">
+                                 <label>Descrição da Rua</label>
+                                 <input type="text" class="street-description" placeholder="Descrição da rua" required>
+                             </div>
+                         </div>
+                         <div class="form-row">
+                             <div class="form-group">
+                                 <label>Quantidade Esperada</label>
+                                 <input type="number" class="expected-quantity" value="0" required>
+                             </div>
+                             <div class="form-group">
+                                 <label>Quantidade Real</label>
+                                 <input type="number" class="actual-quantity" value="0" required>
+                             </div>
+                         </div>
+                         <div class="form-row" style="display: ${usesBatches ? 'flex' : 'none'};">
+                             <div class="form-group">
+                                 <label>Quantidade de Lotes Não Encontrados</label>
+                                 <input type="number" class="batches-not-found" value="0">
+                             </div>
+                             <div class="form-group">
+                                 <label>Quantidade de Caixas Não Cadastradas</label>
+                                 <input type="number" class="boxes-not-registered" value="0">
+                             </div>
+                         </div>
+                         <div class="form-row" style="display: ${usesBatches ? 'flex' : 'none'};">
+                             <div class="form-group">
+                                 <label>Quantidade de Caixas em Local Errado</label>
+                                 <input type="number" class="boxes-wrong-location" value="0">
+                             </div>
+                             <div class="form-group">
+                                 <label>Quantidade de Lotes Baixados</label>
+                                 <input type="number" class="batches-downloaded" value="0">
+                             </div>
+                         </div>
+                         <button type="button" class="btn btn-danger btn-sm" onclick="removeAuditItemPage(this)">
+                             <i class="fas fa-trash"></i> Remover Rua
+                         </button>
+                     </div>
+                 `;
+             }
+             
+             itemsContainer.insertAdjacentHTML('beforeend', itemHTML);
+         }
+
+        // Remover item da auditoria (página)
+        function removeAuditItemPage(button) {
+            button.closest('.audit-item').remove();
+        }
+
+        // Alternar visibilidade dos campos de lotes
+        function toggleBatchFields() {
+            const usesBatches = document.getElementById('uses-batches-page').checked;
+            const batchFields = document.querySelectorAll('.batches-not-found, .boxes-not-registered, .boxes-wrong-location, .batches-downloaded');
+            
+            batchFields.forEach(field => {
+                const formRow = field.closest('.form-row');
+                if (formRow) {
+                    formRow.style.display = usesBatches ? 'flex' : 'none';
+                }
+            });
+        }
+
+                 // Salvar auditoria (página)
+         function saveAuditPage() {
+             const auditDate = document.getElementById('audit-date-page').value;
+             const auditor = document.getElementById('auditor-name-page').value;
+             const location = document.getElementById('audit-location-page').value;
+             const entryType = getCurrentEntryType();
+             const usesBatches = document.getElementById('uses-batches-page').checked;
+             
+             if (!auditDate || !auditor || !location) {
+                 alert('Por favor, preencha todos os campos obrigatórios.');
+                 return;
+             }
+
+             const items = getAuditItemsPage();
+             if (items.length === 0) {
+                 alert('Adicione pelo menos um item à auditoria.');
+                 return;
+             }
+
+             const auditData = {
+                 id: 'AUD-' + Date.now(),
+                 date: auditDate,
+                 auditor: auditor,
+                 location: location,
+                 items: items,
+                 entryType: entryType,
+                 usesBatches: usesBatches
+             };
+
+            const existingAudits = JSON.parse(localStorage.getItem('audits') || '[]');
+            existingAudits.push(auditData);
+            localStorage.setItem('audits', JSON.stringify(existingAudits));
+
+            alert('Auditoria salva com sucesso!');
+            
+            // Limpar formulário
+            document.getElementById('audit-form-page').reset();
+            document.getElementById('audit-items-page').innerHTML = '';
+            addAuditItemPage();
+        }
+
+                 // Obter itens da auditoria (página)
+         function getAuditItemsPage() {
+             const items = [];
+             const itemElements = document.querySelectorAll('#audit-items-page .audit-item');
+             const currentEntryType = getCurrentEntryType();
+             
+             itemElements.forEach(item => {
+                 let itemData = {
+                     id: item.dataset.id,
+                     expectedQuantity: parseInt(item.querySelector('.expected-quantity').value) || 0,
+                     actualQuantity: parseInt(item.querySelector('.actual-quantity').value) || 0,
+                     batchesNotFound: parseInt(item.querySelector('.batches-not-found').value) || 0,
+                     boxesNotRegistered: parseInt(item.querySelector('.boxes-not-registered').value) || 0,
+                     boxesWrongLocation: parseInt(item.querySelector('.boxes-wrong-location').value) || 0,
+                     batchesDownloaded: parseInt(item.querySelector('.batches-downloaded').value) || 0
+                 };
+                 
+                 if (currentEntryType === 'produto') {
+                     itemData.productCode = item.querySelector('.product-code').value;
+                     itemData.productName = item.querySelector('.product-name').value;
+                 } else if (currentEntryType === 'classe') {
+                     itemData.classCode = item.querySelector('.class-code').value;
+                     itemData.classDescription = item.querySelector('.class-description').value;
+                 } else if (currentEntryType === 'rua') {
+                     itemData.streetName = item.querySelector('.street-name').value;
+                     itemData.streetDescription = item.querySelector('.street-description').value;
+                 }
+                 
+                 items.push(itemData);
+             });
+
+             return items;
+         }
+
+        // Carregar dashboard de auditoria (página)
+        function loadAuditDashboardPage() {
+            const audits = JSON.parse(localStorage.getItem('audits') || '[]');
+            const dashboardContainer = document.getElementById('audit-dashboard-content-page');
+            
+            if (audits.length === 0) {
+                dashboardContainer.innerHTML = '<p class="empty-state">Nenhuma auditoria encontrada.</p>';
+                return;
+            }
+
+            // Filtros
+            const uniqueEntryTypes = [...new Set(audits.map(audit => audit.entryType))];
+            const uniqueAuditors = [...new Set(audits.map(audit => audit.auditor))];
+            const uniqueLocations = [...new Set(audits.map(audit => audit.location))];
+
+            let dashboardHTML = `
+                <div class="filters-container">
+                    <h3>Filtros</h3>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-entry-type">Tipo de Entrada</label>
+                            <select id="filter-entry-type">
+                                <option value="">Todos</option>
+                                ${uniqueEntryTypes.map(type => `<option value="${type}">${type.charAt(0).toUpperCase() + type.slice(1)}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-auditor">Auditor</label>
+                            <select id="filter-auditor">
+                                <option value="">Todos</option>
+                                ${uniqueAuditors.map(auditor => `<option value="${auditor}">${auditor}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-location">Localização</label>
+                            <select id="filter-location">
+                                <option value="">Todas</option>
+                                ${uniqueLocations.map(location => `<option value="${location}">${location}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-error-type">Tipo de Erro</label>
+                            <select id="filter-error-type">
+                                <option value="">Todos</option>
+                                <option value="batches-not-found">Lotes Não Encontrados</option>
+                                <option value="boxes-not-registered">Caixas Não Cadastradas</option>
+                                <option value="boxes-wrong-location">Caixas em Local Errado</option>
+                                <option value="batches-downloaded">Lotes Baixados</option>
+                                <option value="quantity-mismatch">Divergência de Quantidade</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="filter-date-from">Data Inicial</label>
+                            <input type="date" id="filter-date-from">
+                        </div>
+                        <div class="filter-group">
+                            <label for="filter-date-to">Data Final</label>
+                            <input type="date" id="filter-date-to">
+                        </div>
+                        <div class="filter-buttons">
+                            <button class="filter-btn primary" onclick="applyFilters()">
+                                <i class="fas fa-filter"></i> Aplicar Filtros
+                            </button>
+                            <button class="filter-btn secondary" onclick="clearFilters()">
+                                <i class="fas fa-times"></i> Limpar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Estatísticas gerais
+            const totalAudits = audits.length;
+            const totalErrors = audits.reduce((sum, audit) => {
+                return sum + audit.items.reduce((itemSum, item) => {
+                    return itemSum + (item.expectedQuantity !== item.actualQuantity ? 1 : 0);
+                }, 0);
+            }, 0);
+            const totalItems = audits.reduce((sum, audit) => sum + audit.items.length, 0);
+            const accuracyRate = totalItems > 0 ? ((totalItems - totalErrors) / totalItems * 100).toFixed(1) : 0;
+
+            dashboardHTML += `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">${totalAudits}</div>
+                        <div class="stat-label">Total de Auditorias</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${totalErrors}</div>
+                        <div class="stat-label">Total de Erros</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${accuracyRate}%</div>
+                        <div class="stat-label">Taxa de Precisão</div>
+                    </div>
+                </div>
+            `;
+
+            // Gráficos
+            dashboardHTML += `
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <div class="chart-title">Auditorias por Tipo de Entrada</div>
+                        <div class="chart-container">
+                            <canvas id="entryTypeChart"></canvas>
+                        </div>
+                    </div>
+                                           <div class="chart-card">
+                           <div class="chart-title">Setores com Mais Erros</div>
+                           <div class="chart-container">
+                               <canvas id="locationErrorsChart"></canvas>
+                           </div>
+                       </div>
+                </div>
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <div class="chart-title">Evolução das Auditorias</div>
+                        <div class="chart-container">
+                            <canvas id="evolutionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Distribuição de Erros</div>
+                        <div class="chart-container">
+                            <canvas id="errorDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+            `;
+
+            // Lista de auditorias
+            dashboardHTML += '<div class="audit-list">';
+            dashboardHTML += '<h3>Histórico de Auditorias</h3>';
+            audits.forEach(audit => {
+                const errorCount = audit.items.reduce((sum, item) => {
+                    return sum + (item.expectedQuantity !== item.actualQuantity ? 1 : 0);
+                }, 0);
+                
+                dashboardHTML += `
+                    <div class="audit-card">
+                        <div class="audit-header">
+                            <h4>Auditoria ${audit.id}</h4>
+                            <span class="audit-date">${new Date(audit.date).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                        <div class="audit-details">
+                            <p><strong>Auditor:</strong> ${audit.auditor}</p>
+                            <p><strong>Localização:</strong> ${audit.location}</p>
+                            <p><strong>Tipo:</strong> ${audit.entryType.charAt(0).toUpperCase() + audit.entryType.slice(1)}</p>
+                            <p><strong>Itens:</strong> ${audit.items.length}</p>
+                            <p><strong>Erros:</strong> ${errorCount}</p>
+                            ${getEntryTypeDetails(audit)}
+                        </div>
+                    </div>
+                `;
+            });
+            dashboardHTML += '</div>';
+            
+            dashboardContainer.innerHTML = dashboardHTML;
+
+            // Criar gráficos após o HTML ser renderizado
+            createCharts(audits);
+            
+            // Mostrar número inicial de resultados
+            showFilterResults(audits.length);
+
+        }
+
+        // Aplicar filtros
+        function applyFilters() {
+            const entryTypeFilter = document.getElementById('filter-entry-type').value;
+            const auditorFilter = document.getElementById('filter-auditor').value;
+            const locationFilter = document.getElementById('filter-location').value;
+            const dateFromFilter = document.getElementById('filter-date-from').value;
+            const dateToFilter = document.getElementById('filter-date-to').value;
+            const errorTypeFilter = document.getElementById('filter-error-type').value;
+
+            let audits = JSON.parse(localStorage.getItem('audits') || '[]');
+
+            // Aplicar filtros
+            if (entryTypeFilter) {
+                audits = audits.filter(audit => audit.entryType === entryTypeFilter);
+            }
+            if (auditorFilter) {
+                audits = audits.filter(audit => audit.auditor === auditorFilter);
+            }
+            if (locationFilter) {
+                audits = audits.filter(audit => audit.location === locationFilter);
+            }
+            if (dateFromFilter) {
+                audits = audits.filter(audit => audit.date >= dateFromFilter);
+            }
+            if (dateToFilter) {
+                audits = audits.filter(audit => audit.date <= dateToFilter);
+            }
+            if (errorTypeFilter) {
+                audits = audits.filter(audit => {
+                    return audit.items.some(item => {
+                        switch(errorTypeFilter) {
+                            case 'batches-not-found':
+                                return parseInt(item.batchesNotFound || 0) > 0;
+                            case 'boxes-not-registered':
+                                return parseInt(item.boxesNotRegistered || 0) > 0;
+                            case 'boxes-wrong-location':
+                                return parseInt(item.boxesWrongLocation || 0) > 0;
+                            case 'batches-downloaded':
+                                return parseInt(item.batchesDownloaded || 0) > 0;
+                            case 'quantity-mismatch':
+                                return item.expectedQuantity !== item.actualQuantity;
+                            default:
+                                return true;
+                        }
+                    });
+                });
+            }
+
+            // Atualizar estatísticas com dados filtrados
+            updateFilteredStats(audits);
+            
+            // Atualizar lista de auditorias com dados filtrados
+            updateFilteredAuditList(audits);
+            
+            // Recriar gráficos com dados filtrados
+            createCharts(audits);
+            
+            // Mostrar número de resultados
+            showFilterResults(audits.length);
+        }
+
+        // Atualizar estatísticas filtradas
+        function updateFilteredStats(audits) {
+            const totalAudits = audits.length;
+            const totalErrors = audits.reduce((sum, audit) => {
+                return sum + audit.items.reduce((itemSum, item) => {
+                    return itemSum + (item.expectedQuantity !== item.actualQuantity ? 1 : 0);
+                }, 0);
+            }, 0);
+            const totalItems = audits.reduce((sum, audit) => sum + audit.items.length, 0);
+            const accuracyRate = totalItems > 0 ? ((totalItems - totalErrors) / totalItems * 100).toFixed(1) : 0;
+
+            // Atualizar cards de estatísticas
+            const statCards = document.querySelectorAll('.stat-card .stat-number');
+            if (statCards.length >= 3) {
+                statCards[0].textContent = totalAudits;
+                statCards[1].textContent = totalErrors;
+                statCards[2].textContent = accuracyRate + '%';
+            }
+        }
+
+        // Atualizar lista de auditorias filtradas
+        function updateFilteredAuditList(audits) {
+            const auditListContainer = document.querySelector('.audit-list');
+            if (!auditListContainer) return;
+
+            let auditListHTML = '<h3>Histórico de Auditorias</h3>';
+            
+            if (audits.length === 0) {
+                auditListHTML += '<p class="empty-state">Nenhuma auditoria encontrada com os filtros aplicados.</p>';
+            } else {
+                audits.forEach(audit => {
+                    const errorCount = audit.items.reduce((sum, item) => {
+                        return sum + (item.expectedQuantity !== item.actualQuantity ? 1 : 0);
+                    }, 0);
+                    
+                    auditListHTML += `
+                        <div class="audit-card">
+                            <div class="audit-header">
+                                <h4>Auditoria ${audit.id}</h4>
+                                <span class="audit-date">${new Date(audit.date).toLocaleDateString('pt-BR')}</span>
+                            </div>
+                            <div class="audit-details">
+                                <p><strong>Auditor:</strong> ${audit.auditor}</p>
+                                <p><strong>Localização:</strong> ${audit.location}</p>
+                                <p><strong>Tipo:</strong> ${audit.entryType.charAt(0).toUpperCase() + audit.entryType.slice(1)}</p>
+                                <p><strong>Itens:</strong> ${audit.items.length}</p>
+                                <p><strong>Erros:</strong> ${errorCount}</p>
+                                ${getEntryTypeDetails(audit)}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            auditListContainer.innerHTML = auditListHTML;
+        }
+
+        // Mostrar número de resultados dos filtros
+        function showFilterResults(count) {
+            let resultsElement = document.getElementById('filter-results');
+            if (!resultsElement) {
+                resultsElement = document.createElement('div');
+                resultsElement.id = 'filter-results';
+                resultsElement.className = 'filter-results';
+                const filtersContainer = document.querySelector('.filters-container');
+                if (filtersContainer) {
+                    filtersContainer.appendChild(resultsElement);
+                }
+            }
+            
+            const totalAudits = JSON.parse(localStorage.getItem('audits') || '[]').length;
+            if (count === totalAudits) {
+                resultsElement.innerHTML = `<span class="results-text">Mostrando todas as ${count} auditorias</span>`;
+            } else {
+                resultsElement.innerHTML = `<span class="results-text">Mostrando ${count} de ${totalAudits} auditorias</span>`;
+            }
+        }
+
+        // Limpar filtros
+        function clearFilters() {
+            document.getElementById('filter-entry-type').value = '';
+            document.getElementById('filter-auditor').value = '';
+            document.getElementById('filter-location').value = '';
+            document.getElementById('filter-date-from').value = '';
+            document.getElementById('filter-date-to').value = '';
+            document.getElementById('filter-error-type').value = '';
+            
+            // Recarregar dashboard com todos os dados
+            loadAuditDashboardPage();
+        }
+
+                 // Obter detalhes do tipo de entrada para exibição
+         function getEntryTypeDetails(audit) {
+             if (!audit.items || audit.items.length === 0) return '';
+             
+             let details = '';
+             const firstItem = audit.items[0];
+             
+             switch(audit.entryType) {
+                 case 'Rua':
+                     if (firstItem.streetName) {
+                         details += `<p><strong>Rua:</strong> ${firstItem.streetName}</p>`;
+                     }
+                     if (firstItem.streetDescription) {
+                         details += `<p><strong>Descrição:</strong> ${firstItem.streetDescription}</p>`;
+                     }
+                     break;
+                 case 'Classe':
+                     if (firstItem.classCode) {
+                         details += `<p><strong>Código:</strong> ${firstItem.classCode}</p>`;
+                     }
+                     if (firstItem.classDescription) {
+                         details += `<p><strong>Descrição:</strong> ${firstItem.classDescription}</p>`;
+                     }
+                     break;
+                 case 'Produto':
+                     if (firstItem.productCode) {
+                         details += `<p><strong>Código:</strong> ${firstItem.productCode}</p>`;
+                     }
+                     if (firstItem.productName) {
+                         details += `<p><strong>Nome:</strong> ${firstItem.productName}</p>`;
+                     }
+                     break;
+                 default:
+                     break;
+             }
+             
+             // Adicionar informações de erros
+             const totalErrors = audit.items.reduce((sum, item) => {
+                 return sum + 
+                     parseInt(item.batchesNotFound || 0) +
+                     parseInt(item.boxesNotRegistered || 0) +
+                     parseInt(item.boxesWrongLocation || 0) +
+                     parseInt(item.batchesDownloaded || 0);
+             }, 0);
+             
+             if (totalErrors > 0) {
+                 details += `<p><strong>Total de Erros:</strong> ${totalErrors}</p>`;
+             }
+             
+             return details;
+         }
+
+        // Carregar cronograma de auditorias
+        function loadAuditSchedule() {
+            const scheduleContainer = document.getElementById('audit-schedule-content');
+            
+            // Obter mês atual
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth();
+            const currentYear = currentDate.getFullYear();
+            
+            // Carregar dados do localStorage ou usar dados de exemplo
+            let scheduleData = JSON.parse(localStorage.getItem('auditSchedule') || '[]');
+            
+            // Se não há dados, criar dados de exemplo para o mês atual
+            if (scheduleData.length === 0) {
+                scheduleData = generateSampleScheduleData(currentMonth, currentYear);
+                localStorage.setItem('auditSchedule', JSON.stringify(scheduleData));
+            }
+            
+            // Filtrar dados do mês selecionado
+            const selectedMonth = document.getElementById('month-selector')?.value || `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+            const [year, month] = selectedMonth.split('-');
+            const filteredData = scheduleData.filter(item => {
+                const itemDate = new Date(item.date);
+                return itemDate.getFullYear() == year && itemDate.getMonth() == month - 1;
+            });
+            
+            // Calcular taxa de conclusão
+            const totalItems = filteredData.length;
+            const completedItems = filteredData.filter(item => item.status === 'completed').length;
+            const completionRate = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+            
+            let scheduleHTML = `
+                <div class="schedule-header">
+                    <div class="schedule-title-section">
+                        <h3>Cronograma de Auditorias</h3>
+                        <div class="completion-rate">
+                            <div class="completion-circle">
+                                <span class="completion-percentage">${completionRate}%</span>
+                                <span class="completion-label">Concluído</span>
+                            </div>
+                            <div class="completion-stats">
+                                <span>${completedItems}/${totalItems} auditorias</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="schedule-actions">
+                        <div class="month-selector-container">
+                            <label for="month-selector">Mês:</label>
+                            <input type="month" id="month-selector" value="${selectedMonth}" onchange="loadAuditSchedule()">
+                        </div>
+                        <button class="btn btn-primary" onclick="showAddScheduleModal()">
+                            <i class="fas fa-plus"></i> Nova Auditoria
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportSchedule()">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="schedule-filters">
+                    <select id="schedule-status-filter" onchange="filterSchedule()">
+                        <option value="">Todos os Status</option>
+                        <option value="scheduled">Agendado</option>
+                        <option value="in-progress">Em Andamento</option>
+                        <option value="completed">Concluído</option>
+                        <option value="pending">Pendente</option>
+                    </select>
+                    <select id="schedule-priority-filter" onchange="filterSchedule()">
+                        <option value="">Todas as Prioridades</option>
+                        <option value="high">Alta</option>
+                        <option value="medium">Média</option>
+                        <option value="low">Baixa</option>
+                    </select>
+                </div>
+
+                <div class="schedule-grid">
+                    ${filteredData.length > 0 ? filteredData.map(audit => `
+                        <div class="schedule-card ${audit.status} ${audit.priority}">
+                            <div class="schedule-card-header">
+                                <div class="schedule-priority ${audit.priority}">
+                                    <i class="fas fa-flag"></i>
+                                </div>
+                                <div class="schedule-status ${audit.status}">
+                                    <span>${getStatusText(audit.status)}</span>
+                                </div>
+                            </div>
+                            <div class="schedule-card-body">
+                                <h4>${audit.title}</h4>
+                                <p class="schedule-description">${audit.description}</p>
+                                <div class="schedule-details">
+                                    <div class="schedule-detail">
+                                        <i class="fas fa-user"></i>
+                                        <span>${audit.auditor}</span>
+                                    </div>
+                                    <div class="schedule-detail">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>${audit.location}</span>
+                                    </div>
+                                    <div class="schedule-detail">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>${formatDate(audit.date)}</span>
+                                    </div>
+                                    <div class="schedule-detail">
+                                        <i class="fas fa-clock"></i>
+                                        <span>${audit.time}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="schedule-card-actions">
+                                <button class="btn btn-sm btn-primary" onclick="editSchedule(${audit.id})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-sm btn-success" onclick="startAudit(${audit.id})">
+                                    <i class="fas fa-play"></i> Iniciar
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteSchedule(${audit.id})">
+                                    <i class="fas fa-trash"></i> Excluir
+                                </button>
+                            </div>
+                        </div>
+                    `).join('') : `
+                        <div class="empty-schedule">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>Nenhuma auditoria agendada para este mês</p>
+                            <button class="btn btn-primary" onclick="showAddScheduleModal()">
+                                Criar Primeira Auditoria
+                            </button>
+                        </div>
+                    `}
+                </div>
+            `;
+
+            scheduleContainer.innerHTML = scheduleHTML;
+            
+            // Atualizar o círculo de conclusão com a porcentagem
+            const completionCircle = document.querySelector('.completion-circle');
+            if (completionCircle) {
+                completionCircle.style.setProperty('--completion', completionRate);
+            }
+        }
+
+        // Funções auxiliares para o cronograma
+        function getStatusText(status) {
+            const statusMap = {
+                'scheduled': 'Agendado',
+                'in-progress': 'Em Andamento',
+                'completed': 'Concluído',
+                'pending': 'Pendente'
+            };
+            return statusMap[status] || status;
+        }
+
+        function filterSchedule() {
+            const statusFilter = document.getElementById('schedule-status-filter').value;
+            const priorityFilter = document.getElementById('schedule-priority-filter').value;
+            
+            const cards = document.querySelectorAll('.schedule-card');
+            cards.forEach(card => {
+                let show = true;
+                
+                if (statusFilter && !card.classList.contains(statusFilter)) {
+                    show = false;
+                }
+                
+                if (priorityFilter && !card.classList.contains(priorityFilter)) {
+                    show = false;
+                }
+                
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        function showAddScheduleModal() {
+            alert('Funcionalidade de adicionar nova auditoria agendada será implementada em breve.');
+        }
+
+        function editSchedule(id) {
+            alert(`Editar auditoria agendada ${id} - Funcionalidade será implementada em breve.`);
+        }
+
+        function startAudit(id) {
+            alert(`Iniciar auditoria ${id} - Funcionalidade será implementada em breve.`);
+        }
+
+        function deleteSchedule(id) {
+            if (confirm('Tem certeza que deseja excluir esta auditoria agendada?')) {
+                alert(`Auditoria ${id} excluída - Funcionalidade será implementada em breve.`);
+            }
+        }
+
+        function exportSchedule() {
+            alert('Exportar cronograma - Funcionalidade será implementada em breve.');
+        }
+
+        // Gerar dados de exemplo para o cronograma
+        function generateSampleScheduleData(month, year) {
+            const auditors = ['João Silva', 'Maria Santos', 'Carlos Oliveira', 'Ana Costa', 'Pedro Lima'];
+            const locations = ['Setor A', 'Setor B', 'Setor C', 'Rua A', 'Rua B', 'Rua C'];
+            const titles = [
+                'Auditoria Mensal Completa',
+                'Auditoria de Produtos Específicos',
+                'Auditoria de Rotina',
+                'Auditoria de Lotes',
+                'Auditoria de Classe Eletrônicos',
+                'Auditoria de Alta Prioridade'
+            ];
+            const descriptions = [
+                'Auditoria completa incluindo todas as ruas e produtos',
+                'Verificação de produtos com alto valor agregado',
+                'Auditoria semanal de rotina',
+                'Verificação de lotes próximos ao vencimento',
+                'Auditoria específica da classe de produtos eletrônicos',
+                'Auditoria prioritária de produtos críticos'
+            ];
+            
+            const scheduleData = [];
+            let id = 1;
+            
+            // Gerar 8-12 auditorias para o mês
+            const numAudits = Math.floor(Math.random() * 5) + 8;
+            
+            for (let i = 0; i < numAudits; i++) {
+                const day = Math.floor(Math.random() * 28) + 1;
+                const hour = Math.floor(Math.random() * 8) + 8; // 8h às 16h
+                const minute = Math.floor(Math.random() * 4) * 15; // 0, 15, 30, 45
+                
+                const statuses = ['scheduled', 'in-progress', 'completed', 'pending'];
+                const priorities = ['high', 'medium', 'low'];
+                
+                scheduleData.push({
+                    id: id++,
+                    title: titles[Math.floor(Math.random() * titles.length)],
+                    description: descriptions[Math.floor(Math.random() * descriptions.length)],
+                    auditor: auditors[Math.floor(Math.random() * auditors.length)],
+                    location: locations[Math.floor(Math.random() * locations.length)],
+                    date: `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+                    time: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
+                    status: statuses[Math.floor(Math.random() * statuses.length)],
+                    priority: priorities[Math.floor(Math.random() * priorities.length)]
+                });
+            }
+            
+            return scheduleData;
+        }
+
+        // Formatar data para exibição
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        // Criar gráficos - OTIMIZADOS
+        function createCharts(audits) {
+            // Configuração global do Chart.js
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.font.size = 12;
+            Chart.defaults.color = '#5a6c7d';
+            Chart.defaults.plugins.legend.labels.usePointStyle = true;
+            Chart.defaults.plugins.legend.labels.padding = 20;
+
+            // Gráfico 1: Auditorias por Tipo de Entrada
+            const entryTypeData = {};
+            const entryTypeDetails = {};
+            
+            audits.forEach(audit => {
+                entryTypeData[audit.entryType] = (entryTypeData[audit.entryType] || 0) + 1;
+                
+                // Coletar detalhes específicos por tipo
+                if (audit.items && audit.items.length > 0) {
+                    const firstItem = audit.items[0];
+                    if (audit.entryType === 'Produto' && firstItem.productCode) {
+                        entryTypeDetails[audit.entryType] = `Código: ${firstItem.productCode}`;
+                    } else if (audit.entryType === 'Classe' && firstItem.classCode) {
+                        entryTypeDetails[audit.entryType] = `Classe: ${firstItem.classCode}`;
+                    } else if (audit.entryType === 'Rua' && firstItem.streetName) {
+                        entryTypeDetails[audit.entryType] = `Rua: ${firstItem.streetName}`;
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('entryTypeChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(entryTypeData).map(type => type.charAt(0).toUpperCase() + type.slice(1)),
+                    datasets: [{
+                        data: Object.values(entryTypeData),
+                        backgroundColor: [
+                            '#FF6B6B',  // Vermelho vibrante para Classe
+                            '#4ECDC4',  // Turquesa para Produto
+                            '#45B7D1'   // Azul para Rua
+                        ],
+                        hoverBackgroundColor: [
+                            '#FF5252',  // Vermelho mais vibrante no hover
+                            '#26A69A',  // Turquesa mais escuro no hover
+                            '#1976D2'   // Azul mais escuro no hover
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'rgba(255, 255, 255, 0.9)',
+                        hoverBorderWidth: 4,
+                        hoverBorderColor: 'rgba(255, 255, 255, 1)',
+                        cutout: '60%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                },
+                                color: '#1e3c72',
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 25,
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map((label, i) => {
+                                            const dataset = data.datasets[0];
+                                            const backgroundColor = dataset.backgroundColor[i];
+                                            return {
+                                                text: label,
+                                                fillStyle: backgroundColor,
+                                                strokeStyle: backgroundColor,
+                                                lineWidth: 0,
+                                                pointStyle: 'circle',
+                                                hidden: false,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 60, 114, 0.95)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            titleFont: {
+                                size: 14,
+                                weight: '600'
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico 2: Erros por Localização
+            const locationErrors = {};
+            audits.forEach(audit => {
+                const errors = audit.items.reduce((sum, item) => {
+                    return sum + (item.expectedQuantity !== item.actualQuantity ? 1 : 0);
+                }, 0);
+                locationErrors[audit.location] = (locationErrors[audit.location] || 0) + errors;
+            });
+
+            new Chart(document.getElementById('locationErrorsChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(locationErrors),
+                    datasets: [{
+                        label: 'Erros',
+                        data: Object.values(locationErrors),
+                        backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                        borderColor: 'rgba(192, 57, 43, 0.9)',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                        hoverBackgroundColor: 'rgba(231, 76, 60, 1)',
+                        hoverBorderColor: 'rgba(192, 57, 43, 1)',
+                        hoverBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(231, 76, 60, 0.95)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            titleFont: {
+                                size: 14,
+                                weight: '600'
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(30, 60, 114, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#5a6c7d',
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#5a6c7d',
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico 3: Evolução das Auditorias
+            const evolutionData = {};
+            audits.forEach(audit => {
+                const date = new Date(audit.date).toLocaleDateString('pt-BR');
+                evolutionData[date] = (evolutionData[date] || 0) + 1;
+            });
+
+            new Chart(document.getElementById('evolutionChart'), {
+                type: 'line',
+                data: {
+                    labels: Object.keys(evolutionData),
+                    datasets: [{
+                        label: 'Auditorias',
+                        data: Object.values(evolutionData),
+                        borderColor: '#1e3c72',
+                        backgroundColor: 'rgba(30, 60, 114, 0.15)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#1e3c72',
+                        pointBorderColor: 'white',
+                        pointBorderWidth: 3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#2a5298',
+                        pointHoverBorderColor: 'white',
+                        pointHoverBorderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 60, 114, 0.95)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            titleFont: {
+                                size: 14,
+                                weight: '600'
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(30, 60, 114, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#5a6c7d',
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(30, 60, 114, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#5a6c7d',
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico 4: Distribuição de Erros
+            const errorTypes = {
+                'Lotes Não Encontrados': 0,
+                'Caixas Não Cadastradas': 0,
+                'Caixas em Local Errado': 0,
+                'Lotes Baixados': 0
+            };
+
+            audits.forEach(audit => {
+                audit.items.forEach(item => {
+                    // Somar os valores dos campos de erro específicos
+                    errorTypes['Lotes Não Encontrados'] += parseInt(item.batchesNotFound || 0);
+                    errorTypes['Caixas Não Cadastradas'] += parseInt(item.boxesNotRegistered || 0);
+                    errorTypes['Caixas em Local Errado'] += parseInt(item.boxesWrongLocation || 0);
+                    errorTypes['Lotes Baixados'] += parseInt(item.batchesDownloaded || 0);
+                });
+            });
+
+            new Chart(document.getElementById('errorDistributionChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(errorTypes),
+                    datasets: [{
+                        data: Object.values(errorTypes),
+                        backgroundColor: [
+                            'rgba(231, 76, 60, 0.8)',
+                            'rgba(243, 156, 18, 0.8)',
+                            'rgba(155, 89, 182, 0.8)',
+                            'rgba(52, 152, 219, 0.8)'
+                        ],
+                        borderWidth: 3,
+                        borderColor: 'rgba(255, 255, 255, 0.9)',
+                        hoverBorderWidth: 4,
+                        hoverBorderColor: 'rgba(255, 255, 255, 1)',
+                        hoverBackgroundColor: [
+                            'rgba(231, 76, 60, 1)',
+                            'rgba(243, 156, 18, 1)',
+                            'rgba(155, 89, 182, 1)',
+                            'rgba(52, 152, 219, 1)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                },
+                                color: '#1e3c72',
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 25
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 60, 114, 0.95)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            titleFont: {
+                                size: 14,
+                                weight: '600'
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    }
+                }
+            });
+
+
+        }
+
     </script>
 </body>
 </html> 
