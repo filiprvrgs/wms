@@ -3942,11 +3942,11 @@
 
         // Calcular aproveitamento de horários
         function calculateTimeUtilization(year, month) {
-            // Obter dados de auditorias reais do localStorage
-            const audits = JSON.parse(localStorage.getItem('audits') || '[]');
+            // Obter dados de auditorias agendadas do localStorage
+            const scheduleData = JSON.parse(localStorage.getItem('auditSchedule') || '[]');
             
             // Filtrar auditorias do mês especificado
-            const monthAudits = audits.filter(audit => {
+            const monthAudits = scheduleData.filter(audit => {
                 const auditDate = new Date(audit.date);
                 return auditDate.getFullYear() === year && auditDate.getMonth() === month;
             });
@@ -3958,16 +3958,8 @@
             let totalAuditHours = 0;
             
             monthAudits.forEach(audit => {
-                // Se a auditoria tem dados de tempo, usar eles
-                if (audit.hora_inicio && audit.hora_fim) {
-                    const startTime = new Date(audit.hora_inicio);
-                    const endTime = new Date(audit.hora_fim);
-                    const durationHours = (endTime - startTime) / (1000 * 60 * 60);
-                    totalAuditHours += durationHours;
-                } else {
-                    // Estimativa padrão: 2 horas por auditoria
-                    totalAuditHours += 2;
-                }
+                // Estimativa padrão: 2 horas por auditoria agendada
+                totalAuditHours += 2;
             });
             
             // Calcular aproveitamento
