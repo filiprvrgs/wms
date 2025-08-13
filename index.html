@@ -551,6 +551,56 @@
             font-weight: 500;
         }
 
+        .utilization-rate {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-left: 30px;
+        }
+
+        .utilization-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: conic-gradient(#4CAF50 0deg, #4CAF50 calc(var(--utilization, 0) * 3.6deg), #e0e0e0 calc(var(--utilization, 0) * 3.6deg), #e0e0e0 360deg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .utilization-circle::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .utilization-percentage {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2a5298;
+            z-index: 1;
+        }
+
+        .utilization-label {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 2px;
+            z-index: 1;
+        }
+
+        .utilization-stats {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #1e3c72;
+            font-weight: 500;
+        }
+
         .month-selector-container {
             display: flex;
             align-items: center;
@@ -778,7 +828,7 @@
             color: #1e3c72;
             font-weight: 600;
         }
-        }
+        
 
         .empty-schedule p {
             font-size: 16px;
@@ -2240,6 +2290,14 @@
                                  <label for="audit-location-page">Local da Auditoria</label>
                                  <input type="text" id="audit-location-page" placeholder="Setor/Área" required>
                              </div>
+                             <div class="form-group">
+                                 <label for="audit-start-time-page">Hora de Início</label>
+                                 <input type="time" id="audit-start-time-page" required>
+                             </div>
+                             <div class="form-group">
+                                 <label for="audit-end-time-page">Hora de Fim</label>
+                                 <input type="time" id="audit-end-time-page" required>
+                             </div>
                          </div>
                          
                          <div class="form-group">
@@ -3251,10 +3309,12 @@
              const auditDate = document.getElementById('audit-date-page').value;
              const auditor = document.getElementById('auditor-name-page').value;
              const location = document.getElementById('audit-location-page').value;
+             const startTime = document.getElementById('audit-start-time-page').value;
+             const endTime = document.getElementById('audit-end-time-page').value;
              const entryType = getCurrentEntryType();
              const usesBatches = document.getElementById('uses-batches-page').checked;
              
-             if (!auditDate || !auditor || !location) {
+             if (!auditDate || !auditor || !location || !startTime || !endTime) {
                  alert('Por favor, preencha todos os campos obrigatórios.');
                  return;
              }
@@ -3270,6 +3330,8 @@
                  date: auditDate,
                  auditor: auditor,
                  location: location,
+                 hora_inicio: auditDate + 'T' + startTime,
+                 hora_fim: auditDate + 'T' + endTime,
                  items: items,
                  entryType: entryType,
                  usesBatches: usesBatches
@@ -3695,6 +3757,65 @@
              return details;
          }
 
+        // Calcular aproveitamento de horários
+        function calculateTimeUtilization(year, month) {
+            // Obter dados de auditorias reais do localStorage
+            const audits = JSON.parse(localStorage.getItem('audits') || '[]');
+            
+            // Filtrar auditorias do mês especificado
+            const monthAudits = audits.filter(audit => {
+                const auditDate = new Date(audit.date);
+                return auditDate.getFullYear() === year && auditDate.getMonth() === month;
+            });
+            
+            // Calcular total de horas úteis no mês
+            const totalWorkHours = calculateMonthlyWorkHours(year, month);
+            
+            // Calcular total de horas de auditoria
+            let totalAuditHours = 0;
+            
+            monthAudits.forEach(audit => {
+                // Se a auditoria tem dados de tempo, usar eles
+                if (audit.hora_inicio && audit.hora_fim) {
+                    const startTime = new Date(audit.hora_inicio);
+                    const endTime = new Date(audit.hora_fim);
+                    const durationHours = (endTime - startTime) / (1000 * 60 * 60);
+                    totalAuditHours += durationHours;
+                } else {
+                    // Estimativa padrão: 2 horas por auditoria
+                    totalAuditHours += 2;
+                }
+            });
+            
+            // Calcular aproveitamento
+            const utilization = totalWorkHours > 0 ? (totalAuditHours / totalWorkHours) * 100 : 0;
+            return utilization;
+        }
+        
+        // Calcular horas úteis no mês
+        function calculateMonthlyWorkHours(year, month) {
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            let totalHours = 0;
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayOfWeek = date.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+                
+                // Apenas dias úteis (Segunda a Sexta)
+                if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                    if (dayOfWeek === 5) { // Sexta-feira
+                        // 07:35 às 17:10 (1h de almoço) = 8h 35min = 8.58 horas
+                        totalHours += 8.58;
+                    } else {
+                        // Segunda a Quinta: 07:35 às 17:25 (1h de almoço) = 8h 50min = 8.83 horas
+                        totalHours += 8.83;
+                    }
+                }
+            }
+            
+            return totalHours;
+        }
+
         // Carregar cronograma de auditorias
         function loadAuditSchedule() {
             const scheduleContainer = document.getElementById('audit-schedule-content');
@@ -3726,6 +3847,9 @@
             const completedItems = filteredData.filter(item => item.status === 'completed').length;
             const completionRate = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
             
+            // Calcular aproveitamento de horários
+            const utilizationRate = calculateTimeUtilization(year, month - 1);
+            
             let scheduleHTML = `
                 <div class="schedule-header">
                     <div class="schedule-title-section">
@@ -3737,6 +3861,15 @@
                             </div>
                             <div class="completion-stats">
                                 <span>${completedItems}/${totalItems} auditorias</span>
+                            </div>
+                        </div>
+                        <div class="utilization-rate">
+                            <div class="utilization-circle">
+                                <span class="utilization-percentage">${utilizationRate.toFixed(2)}%</span>
+                                <span class="utilization-label">Aproveitamento</span>
+                            </div>
+                            <div class="utilization-stats">
+                                <span>Horários</span>
                             </div>
                         </div>
                     </div>
@@ -3833,6 +3966,12 @@
             const completionCircle = document.querySelector('.completion-circle');
             if (completionCircle) {
                 completionCircle.style.setProperty('--completion', completionRate);
+            }
+            
+            // Atualizar o círculo de aproveitamento com a porcentagem
+            const utilizationCircle = document.querySelector('.utilization-circle');
+            if (utilizationCircle) {
+                utilizationCircle.style.setProperty('--utilization', utilizationRate);
             }
         }
 
