@@ -601,6 +601,132 @@
             font-weight: 500;
         }
 
+        /* Estilos para o modal de agendamento */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            backdrop-filter: blur(20px);
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            border: 1px solid rgba(30, 60, 114, 0.1);
+            box-shadow: 0 25px 50px rgba(30, 60, 114, 0.2);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 30px;
+            border-bottom: 1px solid rgba(30, 60, 114, 0.1);
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.05), rgba(42, 82, 152, 0.05));
+        }
+
+        .modal-header h2 {
+            color: #1e3c72;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #1e3c72;
+        }
+
+        .modal form {
+            padding: 30px;
+        }
+
+        .modal .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .modal .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal .form-group label {
+            color: #1e3c72;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .modal .form-group input,
+        .modal .form-group select,
+        .modal .form-group textarea {
+            padding: 12px 16px;
+            border: 2px solid rgba(30, 60, 114, 0.1);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e3c72;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .modal .form-group input:focus,
+        .modal .form-group select:focus,
+        .modal .form-group textarea:focus {
+            outline: none;
+            border-color: #1e3c72;
+            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .modal .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(30, 60, 114, 0.1);
+        }
+
         .month-selector-container {
             display: flex;
             align-items: center;
@@ -3056,6 +3182,11 @@
                 case 'remove': return 'fa-minus-circle';
                 case 'edit': return 'fa-edit';
                 case 'stock_readjustment': return 'fa-calculator';
+                case 'schedule_add': return 'fa-calendar-plus';
+                case 'schedule_edit': return 'fa-calendar-check';
+                case 'schedule_delete': return 'fa-calendar-times';
+                case 'audit_start': return 'fa-play-circle';
+                case 'audit_complete': return 'fa-check-circle';
                 default: return 'fa-info-circle';
             }
         }
@@ -3940,9 +4071,15 @@
                                 <button class="btn btn-sm btn-primary" onclick="editSchedule(${audit.id})">
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
-                                <button class="btn btn-sm btn-success" onclick="startAudit(${audit.id})">
-                                    <i class="fas fa-play"></i> Iniciar
-                                </button>
+                                ${audit.status === 'scheduled' ? `
+                                    <button class="btn btn-sm btn-success" onclick="startAudit(${audit.id})">
+                                        <i class="fas fa-play"></i> Iniciar
+                                    </button>
+                                ` : audit.status === 'in-progress' ? `
+                                    <button class="btn btn-sm btn-primary" onclick="completeAudit(${audit.id})">
+                                        <i class="fas fa-check"></i> Concluir
+                                    </button>
+                                ` : ''}
                                 <button class="btn btn-sm btn-danger" onclick="deleteSchedule(${audit.id})">
                                     <i class="fas fa-trash"></i> Excluir
                                 </button>
@@ -4007,20 +4144,378 @@
         }
 
         function showAddScheduleModal() {
-            alert('Funcionalidade de adicionar nova auditoria agendada será implementada em breve.');
+            const modalHTML = `
+                <div id="schedule-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Nova Auditoria Agendada</h2>
+                            <span class="close" onclick="closeScheduleModal()">&times;</span>
+                        </div>
+                        <form id="schedule-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="schedule-title">Título da Auditoria</label>
+                                    <input type="text" id="schedule-title" required placeholder="Ex: Auditoria Mensal Completa">
+                                </div>
+                                <div class="form-group">
+                                    <label for="schedule-auditor">Auditor Responsável</label>
+                                    <input type="text" id="schedule-auditor" required placeholder="Ex: João Silva">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="schedule-location">Local/Setor</label>
+                                    <input type="text" id="schedule-location" required placeholder="Ex: Setor A">
+                                </div>
+                                <div class="form-group">
+                                    <label for="schedule-date">Data</label>
+                                    <input type="date" id="schedule-date" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="schedule-time">Horário</label>
+                                    <input type="time" id="schedule-time" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="schedule-priority">Prioridade</label>
+                                    <select id="schedule-priority" required>
+                                        <option value="low">Baixa</option>
+                                        <option value="medium" selected>Média</option>
+                                        <option value="high">Alta</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="schedule-description">Descrição</label>
+                                <textarea id="schedule-description" rows="3" placeholder="Descreva os detalhes da auditoria..."></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="closeScheduleModal()">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Agendar Auditoria</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            // Remover modal existente se houver
+            const existingModal = document.getElementById('schedule-modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Adicionar modal ao body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Configurar data padrão (próximo dia útil)
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('schedule-date').value = tomorrow.toISOString().split('T')[0];
+            
+            // Configurar horário padrão
+            document.getElementById('schedule-time').value = '09:00';
+            
+            // Configurar evento do formulário
+            document.getElementById('schedule-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveNewSchedule();
+            });
+            
+            // Mostrar modal
+            document.getElementById('schedule-modal').style.display = 'block';
+        }
+
+        function closeScheduleModal() {
+            const modal = document.getElementById('schedule-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function saveNewSchedule() {
+            const title = document.getElementById('schedule-title').value;
+            const auditor = document.getElementById('schedule-auditor').value;
+            const location = document.getElementById('schedule-location').value;
+            const date = document.getElementById('schedule-date').value;
+            const time = document.getElementById('schedule-time').value;
+            const priority = document.getElementById('schedule-priority').value;
+            const description = document.getElementById('schedule-description').value;
+            
+            if (!title || !auditor || !location || !date || !time) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            // Obter dados existentes
+            let scheduleData = JSON.parse(localStorage.getItem('auditSchedule') || '[]');
+            
+            // Criar nova auditoria agendada
+            const newSchedule = {
+                id: Date.now(), // Usar timestamp como ID único
+                title: title,
+                description: description || 'Auditoria agendada',
+                auditor: auditor,
+                location: location,
+                date: date,
+                time: time,
+                status: 'scheduled',
+                priority: priority,
+                createdAt: new Date().toISOString()
+            };
+            
+            // Adicionar à lista
+            scheduleData.push(newSchedule);
+            
+            // Salvar no localStorage
+            localStorage.setItem('auditSchedule', JSON.stringify(scheduleData));
+            
+            // Fechar modal
+            closeScheduleModal();
+            
+            // Recarregar cronograma
+            loadAuditSchedule();
+            
+            // Adicionar transação
+            addTransaction('schedule_add', `Nova auditoria agendada: ${title} para ${formatDate(date)} às ${time}`);
+            
+            alert('Auditoria agendada com sucesso!');
         }
 
         function editSchedule(id) {
-            alert(`Editar auditoria agendada ${id} - Funcionalidade será implementada em breve.`);
+            // Obter dados da auditoria
+            let scheduleData = JSON.parse(localStorage.getItem('auditSchedule') || '[]');
+            const audit = scheduleData.find(item => item.id == id);
+            
+            if (!audit) {
+                alert('Auditoria não encontrada.');
+                return;
+            }
+            
+            const modalHTML = `
+                <div id="schedule-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Editar Auditoria Agendada</h2>
+                            <span class="close" onclick="closeScheduleModal()">&times;</span>
+                        </div>
+                        <form id="schedule-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="schedule-title">Título da Auditoria</label>
+                                    <input type="text" id="schedule-title" value="${audit.title}" required placeholder="Ex: Auditoria Mensal Completa">
+                                </div>
+                                <div class="form-group">
+                                    <label for="schedule-auditor">Auditor Responsável</label>
+                                    <input type="text" id="schedule-auditor" value="${audit.auditor}" required placeholder="Ex: João Silva">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="schedule-location">Local/Setor</label>
+                                    <input type="text" id="schedule-location" value="${audit.location}" required placeholder="Ex: Setor A">
+                                </div>
+                                <div class="form-group">
+                                    <label for="schedule-date">Data</label>
+                                    <input type="date" id="schedule-date" value="${audit.date}" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="schedule-time">Horário</label>
+                                    <input type="time" id="schedule-time" value="${audit.time}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="schedule-priority">Prioridade</label>
+                                    <select id="schedule-priority" required>
+                                        <option value="low" ${audit.priority === 'low' ? 'selected' : ''}>Baixa</option>
+                                        <option value="medium" ${audit.priority === 'medium' ? 'selected' : ''}>Média</option>
+                                        <option value="high" ${audit.priority === 'high' ? 'selected' : ''}>Alta</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="schedule-description">Descrição</label>
+                                <textarea id="schedule-description" rows="3" placeholder="Descreva os detalhes da auditoria...">${audit.description || ''}</textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="closeScheduleModal()">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            // Remover modal existente se houver
+            const existingModal = document.getElementById('schedule-modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Adicionar modal ao body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Configurar evento do formulário
+            document.getElementById('schedule-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateSchedule(id);
+            });
+            
+            // Mostrar modal
+            document.getElementById('schedule-modal').style.display = 'block';
+        }
+
+        function updateSchedule(id) {
+            const title = document.getElementById('schedule-title').value;
+            const auditor = document.getElementById('schedule-auditor').value;
+            const location = document.getElementById('schedule-location').value;
+            const date = document.getElementById('schedule-date').value;
+            const time = document.getElementById('schedule-time').value;
+            const priority = document.getElementById('schedule-priority').value;
+            const description = document.getElementById('schedule-description').value;
+            
+            if (!title || !auditor || !location || !date || !time) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            // Obter dados existentes
+            let scheduleData = JSON.parse(localStorage.getItem('auditSchedule') || '[]');
+            
+            // Encontrar e atualizar a auditoria
+            const index = scheduleData.findIndex(item => item.id == id);
+            if (index === -1) {
+                alert('Auditoria não encontrada.');
+                return;
+            }
+            
+            // Atualizar dados
+            scheduleData[index] = {
+                ...scheduleData[index],
+                title: title,
+                description: description || 'Auditoria agendada',
+                auditor: auditor,
+                location: location,
+                date: date,
+                time: time,
+                priority: priority,
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Salvar no localStorage
+            localStorage.setItem('auditSchedule', JSON.stringify(scheduleData));
+            
+            // Fechar modal
+            closeScheduleModal();
+            
+            // Recarregar cronograma
+            loadAuditSchedule();
+            
+            // Adicionar transação
+            addTransaction('schedule_edit', `Auditoria editada: ${title} para ${formatDate(date)} às ${time}`);
+            
+            alert('Auditoria atualizada com sucesso!');
         }
 
         function startAudit(id) {
-            alert(`Iniciar auditoria ${id} - Funcionalidade será implementada em breve.`);
+            // Obter dados da auditoria
+            let scheduleData = JSON.parse(localStorage.getItem('auditSchedule') || '[]');
+            const audit = scheduleData.find(item => item.id == id);
+            
+            if (!audit) {
+                alert('Auditoria não encontrada.');
+                return;
+            }
+            
+            if (audit.status === 'completed') {
+                alert('Esta auditoria já foi concluída.');
+                return;
+            }
+            
+            if (audit.status === 'in-progress') {
+                alert('Esta auditoria já está em andamento.');
+                return;
+            }
+            
+            // Atualizar status para "em andamento"
+            const index = scheduleData.findIndex(item => item.id == id);
+            scheduleData[index].status = 'in-progress';
+            scheduleData[index].startedAt = new Date().toISOString();
+            
+            // Salvar no localStorage
+            localStorage.setItem('auditSchedule', JSON.stringify(scheduleData));
+            
+            // Recarregar cronograma
+            loadAuditSchedule();
+            
+            // Adicionar transação
+            addTransaction('audit_start', `Auditoria iniciada: ${audit.title}`);
+            
+            alert(`Auditoria "${audit.title}" iniciada com sucesso!`);
+        }
+
+        function completeAudit(id) {
+            // Obter dados da auditoria
+            let scheduleData = JSON.parse(localStorage.getItem('auditSchedule') || '[]');
+            const audit = scheduleData.find(item => item.id == id);
+            
+            if (!audit) {
+                alert('Auditoria não encontrada.');
+                return;
+            }
+            
+            if (audit.status === 'completed') {
+                alert('Esta auditoria já foi concluída.');
+                return;
+            }
+            
+            if (audit.status === 'scheduled') {
+                alert('Esta auditoria precisa ser iniciada antes de ser concluída.');
+                return;
+            }
+            
+            // Atualizar status para "concluído"
+            const index = scheduleData.findIndex(item => item.id == id);
+            scheduleData[index].status = 'completed';
+            scheduleData[index].completedAt = new Date().toISOString();
+            
+            // Salvar no localStorage
+            localStorage.setItem('auditSchedule', JSON.stringify(scheduleData));
+            
+            // Recarregar cronograma
+            loadAuditSchedule();
+            
+            // Adicionar transação
+            addTransaction('audit_complete', `Auditoria concluída: ${audit.title}`);
+            
+            alert(`Auditoria "${audit.title}" concluída com sucesso!`);
         }
 
         function deleteSchedule(id) {
             if (confirm('Tem certeza que deseja excluir esta auditoria agendada?')) {
-                alert(`Auditoria ${id} excluída - Funcionalidade será implementada em breve.`);
+                // Obter dados da auditoria
+                let scheduleData = JSON.parse(localStorage.getItem('auditSchedule') || '[]');
+                const audit = scheduleData.find(item => item.id == id);
+                
+                if (!audit) {
+                    alert('Auditoria não encontrada.');
+                    return;
+                }
+                
+                // Remover da lista
+                scheduleData = scheduleData.filter(item => item.id != id);
+                
+                // Salvar no localStorage
+                localStorage.setItem('auditSchedule', JSON.stringify(scheduleData));
+                
+                // Recarregar cronograma
+                loadAuditSchedule();
+                
+                // Adicionar transação
+                addTransaction('schedule_delete', `Auditoria excluída: ${audit.title}`);
+                
+                alert('Auditoria excluída com sucesso!');
             }
         }
 
