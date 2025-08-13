@@ -2385,15 +2385,276 @@
                 min-width: auto;
             }
 
-            /* Stock readjustment responsive */
-            .stock-readjustment-container {
-                padding: 20px;
-            }
+                    /* Stock readjustment responsive */
+        .stock-readjustment-container {
+            padding: 20px;
+        }
 
-            .stock-readjustment-form {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
+        .stock-readjustment-form {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        /* Time Utilization Page Styles */
+        .time-utilization-container {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(30, 60, 114, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .utilization-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .utilization-header h2 {
+            color: #1e3c72;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .utilization-header p {
+            color: #5a6c7d;
+            font-size: 1.1rem;
+        }
+
+        .utilization-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .month-selector label {
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .month-selector input[type="month"] {
+            padding: 12px 16px;
+            border: 2px solid rgba(30, 60, 114, 0.1);
+            border-radius: 12px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+
+        .month-selector input[type="month"]:focus {
+            outline: none;
+            border-color: #1e3c72;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.15);
+        }
+
+        .utilization-dashboard {
+            display: grid;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .utilization-main-card {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .utilization-circle-container {
+            flex-shrink: 0;
+        }
+
+        .utilization-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #28a745 0deg, #28a745 calc(var(--utilization, 0) * 3.6deg), #e9ecef calc(var(--utilization, 0) * 3.6deg), #e9ecef 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+        }
+
+        .utilization-circle::before {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .utilization-percentage {
+            position: relative;
+            z-index: 1;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e3c72;
+        }
+
+        .utilization-info h3 {
+            color: #1e3c72;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .utilization-description {
+            color: #5a6c7d;
+            font-size: 1rem;
+        }
+
+        .utilization-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .utilization-stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .utilization-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 60, 114, 0.15);
+        }
+
+        .utilization-stat-card .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+        }
+
+        .utilization-stat-card .stat-info h4 {
+            color: #5a6c7d;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .utilization-stat-card .stat-info p {
+            color: #1e3c72;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .utilization-details {
+            margin-bottom: 40px;
+        }
+
+        .utilization-details h3 {
+            color: #1e3c72;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .detail-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .detail-card h4 {
+            color: #1e3c72;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .detail-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .detail-card li {
+            color: #5a6c7d;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .detail-card li::before {
+            content: '•';
+            color: #1e3c72;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .formula {
+            background: rgba(30, 60, 114, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #1e3c72;
+        }
+
+        .formula p {
+            margin-bottom: 8px;
+            color: #1e3c72;
+        }
+
+        .formula-note {
+            font-size: 0.9rem;
+            color: #5a6c7d;
+            font-style: italic;
+        }
+
+        .utilization-history {
+            margin-top: 40px;
+        }
+
+        .utilization-history h3 {
+            color: #1e3c72;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .history-chart-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(30, 60, 114, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            height: 300px;
+        }
 
             /* Audit schedule responsive */
             .schedule-header {
@@ -2512,6 +2773,58 @@
             .utilization-info p {
                 font-size: 0.9rem;
             }
+
+            /* Time utilization page responsive */
+            .time-utilization-container {
+                padding: 20px;
+            }
+
+            .utilization-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .utilization-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .month-selector {
+                justify-content: center;
+            }
+
+            .utilization-main-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .utilization-circle {
+                width: 120px;
+                height: 120px;
+            }
+
+            .utilization-percentage {
+                font-size: 1.5rem;
+            }
+
+            .utilization-stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .utilization-stat-card {
+                padding: 20px;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .detail-card {
+                padding: 20px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -2616,6 +2929,54 @@
 
             .utilization-info p {
                 font-size: 0.85rem;
+            }
+
+            /* Time utilization page responsive for small screens */
+            .time-utilization-container {
+                padding: 15px;
+            }
+
+            .utilization-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .utilization-header p {
+                font-size: 1rem;
+            }
+
+            .utilization-main-card {
+                padding: 20px;
+            }
+
+            .utilization-circle {
+                width: 100px;
+                height: 100px;
+            }
+
+            .utilization-percentage {
+                font-size: 1.3rem;
+            }
+
+            .utilization-stat-card {
+                padding: 15px;
+            }
+
+            .utilization-stat-card .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .utilization-stat-card .stat-info p {
+                font-size: 1.2rem;
+            }
+
+            .detail-card {
+                padding: 15px;
+            }
+
+            .detail-card h4 {
+                font-size: 1.1rem;
             }
 
             /* Modal responsive for very small screens */
@@ -2812,6 +3173,10 @@
                 <li><a href="#" data-section="stock-readjustment">
                     <i class="fas fa-boxes"></i>
                     <span>Readequação de Estoque</span>
+                </a></li>
+                <li><a href="#" data-section="time-utilization">
+                    <i class="fas fa-clock"></i>
+                    <span>Aproveitamento de Horas</span>
                 </a></li>
             </ul>
         </nav>
@@ -3135,6 +3500,112 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Time Utilization Section -->
+            <div class="content-section" id="time-utilization">
+                <div class="time-utilization-container">
+                    <div class="utilization-header">
+                        <h2>Aproveitamento de Horas Trabalhadas</h2>
+                        <p>Monitore a eficiência do uso do tempo em auditorias mensais</p>
+                    </div>
+                    
+                    <div class="utilization-controls">
+                        <div class="month-selector">
+                            <label for="utilization-month">Selecione o Mês/Ano:</label>
+                            <input type="month" id="utilization-month" onchange="updateTimeUtilization()">
+                        </div>
+                        <button class="btn btn-secondary" onclick="refreshUtilizationData()">
+                            <i class="fas fa-sync-alt"></i>
+                            Atualizar Dados
+                        </button>
+                    </div>
+                    
+                    <div class="utilization-dashboard">
+                        <div class="utilization-main-card">
+                            <div class="utilization-circle-container">
+                                <div class="utilization-circle" id="utilization-circle">
+                                    <div class="utilization-percentage" id="utilization-percentage">0%</div>
+                                </div>
+                            </div>
+                            <div class="utilization-info">
+                                <h3>Aproveitamento Atual</h3>
+                                <p class="utilization-description">Percentual de horas utilizadas em auditorias</p>
+                            </div>
+                        </div>
+                        
+                        <div class="utilization-stats-grid">
+                            <div class="utilization-stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>Auditorias Agendadas</h4>
+                                    <p id="scheduled-audits">0</p>
+                                </div>
+                            </div>
+                            
+                            <div class="utilization-stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>Horas de Auditoria</h4>
+                                    <p id="audit-hours">0h</p>
+                                </div>
+                            </div>
+                            
+                            <div class="utilization-stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>Horas Úteis do Mês</h4>
+                                    <p id="work-hours">0h</p>
+                                </div>
+                            </div>
+                            
+                            <div class="utilization-stat-card">
+                                <div class="stat-icon">
+                                    <i class="fas fa-percentage"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <h4>Taxa de Aproveitamento</h4>
+                                    <p id="utilization-rate">0%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="utilization-details">
+                        <h3>Detalhes do Cálculo</h3>
+                        <div class="details-grid">
+                            <div class="detail-card">
+                                <h4>Horários de Trabalho</h4>
+                                <ul>
+                                    <li><strong>Segunda a Quinta:</strong> 07:35 às 17:25 (1h de almoço)</li>
+                                    <li><strong>Sexta:</strong> 07:35 às 17:10 (1h de almoço)</li>
+                                    <li><strong>Dias úteis:</strong> Segunda a sexta-feira</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="detail-card">
+                                <h4>Fórmula de Cálculo</h4>
+                                <div class="formula">
+                                    <p><strong>Aproveitamento = (Horas de Auditoria ÷ Horas Úteis do Mês) × 100</strong></p>
+                                    <p class="formula-note">Estimativa: 2 horas por auditoria agendada</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="utilization-history">
+                        <h3>Histórico de Aproveitamento</h3>
+                        <div class="history-chart-container">
+                            <canvas id="utilization-history-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -3352,6 +3823,9 @@
                     break;
                 case 'stock-readjustment':
                     loadStockReadjustment();
+                    break;
+                case 'time-utilization':
+                    loadTimeUtilization();
                     break;
             }
         }
@@ -4504,6 +4978,150 @@
             return totalHours;
         }
 
+        // Carregar página de aproveitamento de horas
+        function loadTimeUtilization() {
+            // Definir mês atual como padrão
+            const currentDate = new Date();
+            const currentMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+            
+            const monthInput = document.getElementById('utilization-month');
+            if (monthInput) {
+                monthInput.value = currentMonth;
+            }
+            
+            // Carregar dados iniciais
+            updateTimeUtilization();
+            
+            // Inicializar gráfico de histórico
+            initializeUtilizationHistoryChart();
+        }
+
+        // Atualizar aproveitamento de horas
+        function updateTimeUtilization() {
+            const monthInput = document.getElementById('utilization-month');
+            if (!monthInput || !monthInput.value) return;
+            
+            const [year, month] = monthInput.value.split('-');
+            const yearNum = parseInt(year);
+            const monthNum = parseInt(month) - 1;
+            
+            // Calcular aproveitamento
+            const utilization = calculateTimeUtilization(yearNum, monthNum);
+            
+            // Calcular estatísticas
+            const scheduleData = JSON.parse(localStorage.getItem('auditSchedule') || '[]');
+            const monthAudits = scheduleData.filter(audit => {
+                const auditDate = new Date(audit.date);
+                return auditDate.getFullYear() === yearNum && auditDate.getMonth() === monthNum;
+            });
+            
+            const totalWorkHours = calculateMonthlyWorkHours(yearNum, monthNum);
+            const totalAuditHours = monthAudits.length * 2; // 2 horas por auditoria
+            
+            // Atualizar elementos da interface
+            updateUtilizationDisplay(utilization, monthAudits.length, totalAuditHours, totalWorkHours);
+        }
+
+        // Atualizar display do aproveitamento
+        function updateUtilizationDisplay(utilization, scheduledAudits, auditHours, workHours) {
+            // Atualizar círculo de aproveitamento
+            const circle = document.getElementById('utilization-circle');
+            const percentage = document.getElementById('utilization-percentage');
+            
+            if (circle) {
+                circle.style.setProperty('--utilization', utilization);
+            }
+            
+            if (percentage) {
+                percentage.textContent = `${utilization.toFixed(2)}%`;
+            }
+            
+            // Atualizar estatísticas
+            const elements = {
+                'scheduled-audits': scheduledAudits,
+                'audit-hours': `${auditHours}h`,
+                'work-hours': `${workHours.toFixed(1)}h`,
+                'utilization-rate': `${utilization.toFixed(2)}%`
+            };
+            
+            Object.keys(elements).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = elements[id];
+                }
+            });
+        }
+
+        // Atualizar dados de aproveitamento
+        function refreshUtilizationData() {
+            updateTimeUtilization();
+            
+            // Mostrar feedback visual
+            const refreshBtn = document.querySelector('.btn-secondary i.fa-sync-alt');
+            if (refreshBtn) {
+                refreshBtn.style.transform = 'rotate(360deg)';
+                setTimeout(() => {
+                    refreshBtn.style.transform = 'rotate(0deg)';
+                }, 500);
+            }
+        }
+
+        // Inicializar gráfico de histórico
+        function initializeUtilizationHistoryChart() {
+            const ctx = document.getElementById('utilization-history-chart');
+            if (!ctx) return;
+            
+            // Obter dados dos últimos 6 meses
+            const months = [];
+            const utilizationData = [];
+            const currentDate = new Date();
+            
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                const monthStr = date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+                months.push(monthStr);
+                
+                const utilization = calculateTimeUtilization(date.getFullYear(), date.getMonth());
+                utilizationData.push(utilization);
+            }
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Aproveitamento (%)',
+                        data: utilizationData,
+                        borderColor: '#1e3c72',
+                        backgroundColor: 'rgba(30, 60, 114, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         // Carregar cronograma de auditorias
         function loadAuditSchedule() {
             const scheduleContainer = document.getElementById('audit-schedule-content');
@@ -4535,8 +5153,7 @@
             const completedItems = filteredData.filter(item => item.status === 'completed').length;
             const completionRate = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
             
-            // Calcular aproveitamento de horários
-            const utilizationRate = calculateTimeUtilization(year, month - 1);
+
             
             let scheduleHTML = `
                 <div class="schedule-header">
@@ -4551,15 +5168,7 @@
                                 <span>${completedItems}/${totalItems} auditorias</span>
                             </div>
                         </div>
-                        <div class="utilization-rate">
-                            <div class="utilization-circle">
-                                <span class="utilization-percentage">${utilizationRate.toFixed(2)}%</span>
-                                <span class="utilization-label">Aproveitamento</span>
-                            </div>
-                            <div class="utilization-stats">
-                                <span>Horários</span>
-                            </div>
-                        </div>
+
                     </div>
                     <div class="schedule-actions">
                         <div class="month-selector-container">
